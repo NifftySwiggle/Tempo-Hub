@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempo Developer Hub - Payment Templates & Tools</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+  <style>
+    :root {
+      --tempo-blue: #1e90ff;
+      --tempo-cyan: #00e0d3;
+      --tempo-bg: #f7fafd;
+      --tempo-card: #fff;
+      --tempo-radius: 16px;
+      --tempo-shadow: 0 4px 32px rgba(30,144,255,0.12);
+      --tempo-hover-shadow: 0 8px 48px rgba(30,144,255,0.2);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f7fafd 0%, #e8f4fd 100%);
+      color: #222;
+      min-height: 100vh;
+    }
+    
+    .navbar {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 16px rgba(30,144,255,0.08);
+      z-index: 100;
+      padding: 0 32px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .navbar-brand {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .navbar-links a {
+      color: var(--tempo-blue);
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 32px;
+      font-size: 1rem;
+      transition: color 0.2s;
+    }
+    
+    .navbar-links a:hover {
+      color: var(--tempo-cyan);
+    }
+    
+    .hero {
+      text-align: center;
+      padding: 80px 16px 60px 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(30,144,255,0.1) 0%, transparent 70%);
+      animation: pulse 8s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.1) rotate(180deg); }
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .hero h1 {
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 3.5rem;
+      margin-bottom: 16px;
+      font-weight: 700;
+      animation: fadeInDown 0.8s ease-out;
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .hero p {
+      color: #555;
+      font-size: 1.3rem;
+      margin-bottom: 32px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-top: 40px;
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+    
+    .stat {
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 32px 80px 32px;
+    }
+    
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--tempo-blue);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    
+    .section-subtitle {
+      color: #666;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 32px;
+      margin-bottom: 64px;
+    }
+    
+    .card {
+      background: var(--tempo-card);
+      border-radius: var(--tempo-radius);
+      padding: 32px;
+      box-shadow: var(--tempo-shadow);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--tempo-hover-shadow);
+    }
+    
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    .card-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--tempo-blue);
+      margin-bottom: 12px;
+    }
+    
+    .card-description {
+      color: #666;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .coming-soon-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+    
+    .tag {
+      background: linear-gradient(90deg, rgba(30,144,255,0.1) 0%, rgba(0,224,211,0.1) 100%);
+      color: var(--tempo-blue);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .cta-section {
+      background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      border-radius: 24px;
+      padding: 64px 48px;
+      text-align: center;
+      color: white;
+      margin-top: 64px;
+      box-shadow: 0 16px 48px rgba(30,144,255,0.3);
+    }
+    
+    .cta-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    .cta-description {
+      font-size: 1.2rem;
+      margin-bottom: 32px;
+      opacity: 0.95;
+    }
+    
+    .cta-button {
+      background: white;
+      color: var(--tempo-blue);
+      border: none;
+      padding: 16px 40px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+    }
+    
+    footer {
+      text-align: center;
+      color: #888;
+      padding: 40px 16px 24px 16px;
+      font-size: 0.98rem;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(10px);
+    }
+    
+    footer a {
+      color: var(--tempo-blue);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+    
+    footer a:hover {
+      color: var(--tempo-cyan);
+    }
+    
+    .donation-box {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid #e0e0e0;
+    }
+    
+    .donation-address {
+      display: inline-flex;
+      align-items: center;
+      background: #f4f8fb;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #222;
+      margin-top: 12px;
+    }
+    
+    .copy-btn {
+      margin-left: 12px;
+      background: var(--tempo-blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 16px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    
+    .copy-btn:hover {
+      background: var(--tempo-cyan);
+    }
+    
+    .copy-feedback {
+      color: var(--tempo-cyan);
+      font-size: 0.85rem;
+      margin-top: 8px;
+      visibility: hidden;
+    }
+    
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      .stats {
+        flex-direction: column;
+        gap: 24px;
+      }
+      
+      .navbar {
+        padding: 0 16px;
+        flex-direction: column;
+        height: auto;
+        padding-top: 16px;
+        padding-bottom: 16px;
+      }
+      
+      .navbar-links {
+        margin-top: 12px;
+      }
+      
+      .navbar-links a {
+        margin-left: 16px;
+        font-size: 0.9rem;
+      }
+      
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .cta-section {
+        padding: 40px 24px;
+      }
+      
+      .cta-title {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">⚡ Tempo Hub</div>
+    <div class="navbar-links">
+      <a href="https://docs.tempo.xyz/" target="_blank">Docs</a>
+      <a href="https://docs.tempo.xyz/quickstart/faucet" target="_blank">Faucet</a>
+      <a href="https://explore.tempo.xyz" target="_blank">Explorer</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Tempo Developer Hub</h1>
+      <p>Ready-to-use payment templates for accepting stablecoin payments.<br>Copy, customize, and deploy in minutes.</p>
+      
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number">5+</div>
+          <div class="stat-label">Templates</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Open Source</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">⚡</div>
+          <div class="stat-label">Instant Setup</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">🛠️</div>
+          <div class="stat-label">Tools</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <h2 class="section-title">Payment Templates & Tools</h2>
+    <p class="section-subtitle">Choose your platform and start accepting Tempo payments today</p>
+    
+    <div class="cards-grid">
+      <!-- POS Terminal Card -->
+      <a href="tempo-pos.html" class="card">
+       <!-- <span class="coming-soon-badge">Coming Soon</span> -->
+        <div class="card-icon">💳</div>
+        <h3 class="card-title">Tempo POS Terminal</h3>
+        <p class="card-description">
+          Hardware-integrated Point of Sale system with CYD display support. Generate payment QR codes, 
+          monitor transactions in real-time, and print tax receipts automatically.
+        </p>
+        <div class="card-tags">
+          <span class="tag">POS</span>
+          <span class="tag">Hardware</span>
+          <span class="tag">CYD Display</span>
+          <span class="tag">Receipts</span>
+        </div>
+      </a>
+
+      <!-- Payment Kits Card -->
+      <a href="tempo-kits.html" class="card">
+        <div class="card-icon">🧩</div>
+        <h3 class="card-title">Plug & Play Payment Kits</h3>
+        <p class="card-description">
+          Complete integration templates for Shopify, WooCommerce, custom websites, mobile apps, and POS systems. 
+          Ready-to-use code snippets with live demos.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Shopify</span>
+          <span class="tag">WooCommerce</span>
+          <span class="tag">HTML/JS</span>
+          <span class="tag">Mobile</span>
+          <span class="tag">POS</span>
+        </div>
+      </a>
+
+      <!-- Market Demo Card -->
+      <a href="tempo-market-demo.html" class="card">
+        <div class="card-icon">🛒</div>
+        <h3 class="card-title">Market Payment Demo</h3>
+        <p class="card-description">
+          Interactive demo showing how to integrate Tempo payments into marketplace platforms. 
+          Complete with buyer/seller flows and transaction tracking.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Marketplace</span>
+          <span class="tag">Demo</span>
+          <span class="tag">E-commerce</span>
+        </div>
+      </a>
+
+      <!-- Receipt Book Card -->
+      <a href="tempo-receipt.html" class="card">
+        <div class="card-icon">🧾</div>
+        <h3 class="card-title">Receipt Book</h3>
+        <p class="card-description">
+          Track and manage all your Tempo payments with automatic receipt generation. 
+          Export to PDF/CSV, search transactions, and categorize for tax purposes.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Accounting</span>
+          <span class="tag">Tax Reports</span>
+          <span class="tag">Export</span>
+        </div>
+      </a>
+
+      <!-- Contract Deployer Card -->
+      <a href="tempo-contract-deployer.html" class="card">
+        <div class="card-icon">📝</div>
+        <h3 class="card-title">Smart Contract Deployer</h3>
+        <p class="card-description">
+          Deploy smart contracts to Tempo with built-in templates. ERC-20 tokens, NFTs, multi-sig wallets, 
+          and more. Full IDE with compilation and deployment.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Solidity</span>
+          <span class="tag">Deploy</span>
+          <span class="tag">Templates</span>
+        </div>
+      </a>
+
+      <!-- Documentation Card -->
+      <a href="https://docs.tempo.xyz/" target="_blank" class="card">
+        <div class="card-icon">📚</div>
+        <h3 class="card-title">Official Documentation</h3>
+        <p class="card-description">
+          Comprehensive guides, API references, and tutorials from Tempo. Learn about TIP-20 tokens, 
+          payment flows, and advanced integrations.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Docs</span>
+          <span class="tag">API</span>
+          <span class="tag">Tutorials</span>
+        </div>
+      </a>
+
+      <!-- Testnet Tools Card -->
+      <a href="https://docs.tempo.xyz/quickstart/faucet" target="_blank" class="card">
+        <div class="card-icon">🚰</div>
+        <h3 class="card-title">Testnet Faucet</h3>
+        <p class="card-description">
+          Get free testnet tokens to start building and testing your Tempo integration. 
+          Includes setup guides for connecting to the Tempo testnet.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Testnet</span>
+          <span class="tag">Free Tokens</span>
+          <span class="tag">Testing</span>
+        </div>
+      </a>
+
+      <!-- SDK Card -->
+      <a href="https://docs.tempo.xyz/sdk/typescript" target="_blank" class="card">
+        <div class="card-icon">⚙️</div>
+        <h3 class="card-title">Tempo SDK & Libraries</h3>
+        <p class="card-description">
+          Official SDKs for TypeScript, Viem, Wagmi, and thirdweb. Build powerful payment experiences 
+          with production-ready tools.
+        </p>
+        <div class="card-tags">
+          <span class="tag">TypeScript</span>
+          <span class="tag">Viem</span>
+          <span class="tag">Wagmi</span>
+          <span class="tag">SDK</span>
+        </div>
+      </a>
+
+      <!-- Explorer Card -->
+      <a href="https://explore.tempo.xyz" target="_blank" class="card">
+        <div class="card-icon">🔍</div>
+        <h3 class="card-title">Block Explorer</h3>
+        <p class="card-description">
+          View transactions, track payments, and explore the Tempo blockchain. 
+          Real-time transaction monitoring and analytics.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Explorer</span>
+          <span class="tag">Transactions</span>
+          <span class="tag">Analytics</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="cta-section">
+      <h2 class="cta-title">Ready to Start Building?</h2>
+      <p class="cta-description">
+        Pick a template, customize it for your needs, and start accepting stablecoin payments in minutes.
+      </p>
+      <a href="tempo-kits.html" class="cta-button">View All Templates →</a>
+    </div>
+  </div>
+
+  <footer>
+    <div>
+      Built for the <a href="https://docs.tempo.xyz/" target="_blank">Tempo testnet</a>
+    </div>
+    <div style="margin-top:8px;">
+      For production use, see <a href="https://docs.tempo.xyz/sdk/typescript" target="_blank">Tempo SDK Documentation</a>
+    </div>
+    
+    <div class="donation-box">
+      <div style="font-size:0.9em;color:#666;margin-bottom:8px;">
+        Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">nifftyswiggle</a>
+      </div>
+      <div style="font-size:0.9em;color:#666;margin-bottom:8px;">
+        💝 Support this project with a donation:
+      </div>
+      <div class="donation-address">
+        <span id="donation-address">0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f</span>
+        <button class="copy-btn" onclick="copyDonationAddress()">Copy</button>
+      </div>
+      <div id="copy-feedback" class="copy-feedback">✓ Address copied!</div>
+    </div>
+  </footer>
+
+  <script>
+    function copyDonationAddress() {
+      const address = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+      navigator.clipboard.writeText(address).then(() => {
+        const feedback = document.getElementById('copy-feedback');
+        feedback.style.visibility = 'visible';
+        setTimeout(() => { feedback.style.visibility = 'hidden'; }, 2000);
+      });
+    }
+
+    // Add smooth scroll animation
+    document.addEventListener('DOMContentLoaded', function() {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
+      });
+    });
+  </script>
+</body>
+</html>
