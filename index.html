@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tempo Developer Hub - Payment Templates & Tools</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231e90ff;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300e0d3;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23grad)'/%3E%3Cpath d='M30 25 L70 25 L70 35 L55 35 L55 75 L45 75 L45 35 L30 35 Z' fill='white'/%3E%3Cpath d='M62 45 L75 60 L68 60 L68 75 L58 60 L65 60 L65 45 Z' fill='white' opacity='0.9'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
   <style>
     :root {
@@ -14,6 +15,29 @@
       --tempo-radius: 16px;
       --tempo-shadow: 0 4px 32px rgba(30,144,255,0.12);
       --tempo-hover-shadow: 0 8px 48px rgba(30,144,255,0.2);
+      --text-primary: #222;
+      --text-secondary: #555;
+      --text-tertiary: #666;
+      --text-muted: #888;
+      --navbar-bg: rgba(255, 255, 255, 0.95);
+      --footer-bg: rgba(255,255,255,0.5);
+      --donation-bg: #f4f8fb;
+      --border-color: #e0e0e0;
+    }
+    
+    [data-theme="dark"] {
+      --tempo-bg: #0a0e1a;
+      --tempo-card: #151b2e;
+      --tempo-shadow: 0 4px 32px rgba(0,0,0,0.5);
+      --tempo-hover-shadow: 0 8px 48px rgba(30,144,255,0.4);
+      --text-primary: #e8eaed;
+      --text-secondary: #c4c7cc;
+      --text-tertiary: #9aa0a6;
+      --text-muted: #7a8089;
+      --navbar-bg: rgba(21, 27, 46, 0.95);
+      --footer-bg: rgba(21, 27, 46, 0.5);
+      --donation-bg: #1a2235;
+      --border-color: #2a3347;
     }
     
     * {
@@ -24,15 +48,24 @@
     
     body {
       font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #f7fafd 0%, #e8f4fd 100%);
-      color: #222;
+      background: var(--tempo-bg);
+      color: var(--text-primary);
       min-height: 100vh;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    body:not([data-theme="dark"]) {
+      background: linear-gradient(135deg, #f7fafd 0%, #e8f4fd 100%);
+    }
+    
+    [data-theme="dark"] body {
+      background: linear-gradient(135deg, #0a0e1a 0%, #141824 100%);
     }
     
     .navbar {
       position: sticky;
       top: 0;
-      background: rgba(255, 255, 255, 0.95);
+      background: var(--navbar-bg);
       backdrop-filter: blur(10px);
       box-shadow: 0 2px 16px rgba(30,144,255,0.08);
       z-index: 100;
@@ -41,6 +74,39 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: background-color 0.3s ease;
+    }
+    
+    .navbar-center {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .theme-toggle {
+      background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(30,144,255,0.3);
+      white-space: nowrap;
+    }
+    
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 16px rgba(30,144,255,0.4);
+    }
+    
+    .theme-toggle:active {
+      transform: scale(0.95);
     }
     
     .navbar-brand {
@@ -116,7 +182,7 @@
     }
     
     .hero p {
-      color: #555;
+      color: var(--text-secondary);
       font-size: 1.3rem;
       margin-bottom: 32px;
       animation: fadeInUp 0.8s ease-out 0.2s both;
@@ -155,7 +221,7 @@
     }
     
     .stat-label {
-      color: #666;
+      color: var(--text-tertiary);
       font-size: 1rem;
       margin-top: 8px;
     }
@@ -175,7 +241,7 @@
     }
     
     .section-subtitle {
-      color: #666;
+      color: var(--text-tertiary);
       font-size: 1.1rem;
       text-align: center;
       margin-bottom: 48px;
@@ -198,7 +264,7 @@
       overflow: hidden;
       cursor: pointer;
       text-decoration: none;
-      color: inherit;
+      color: var(--text-primary);
       display: block;
     }
     
@@ -236,7 +302,7 @@
     }
     
     .card-description {
-      color: #666;
+      color: var(--text-tertiary);
       font-size: 1rem;
       line-height: 1.6;
       margin-bottom: 20px;
@@ -316,11 +382,12 @@
     
     footer {
       text-align: center;
-      color: #888;
+      color: var(--text-muted);
       padding: 40px 16px 24px 16px;
       font-size: 0.98rem;
-      background: rgba(255,255,255,0.5);
+      background: var(--footer-bg);
       backdrop-filter: blur(10px);
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     
     footer a {
@@ -337,19 +404,20 @@
     .donation-box {
       margin-top: 32px;
       padding-top: 32px;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--border-color);
     }
     
     .donation-address {
       display: inline-flex;
       align-items: center;
-      background: #f4f8fb;
+      background: var(--donation-bg);
       padding: 12px 16px;
       border-radius: 8px;
       font-family: monospace;
       font-size: 0.9rem;
-      color: #222;
+      color: var(--text-primary);
       margin-top: 12px;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     
     .copy-btn {
@@ -424,10 +492,15 @@
 <body>
   <nav class="navbar">
     <div class="navbar-brand">⚡ Tempo Hub</div>
-    <div class="navbar-links">
-      <a href="https://docs.tempo.xyz/" target="_blank">Docs</a>
-      <a href="https://docs.tempo.xyz/quickstart/faucet" target="_blank">Faucet</a>
-      <a href="https://explore.tempo.xyz" target="_blank">Explorer</a>
+    <div class="navbar-center">
+      <div class="navbar-links">
+        <a href="https://docs.tempo.xyz/" target="_blank">Docs</a>
+        <a href="https://docs.tempo.xyz/quickstart/faucet" target="_blank">Faucet</a>
+        <a href="https://explore.tempo.xyz" target="_blank">Explorer</a>
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="theme-text">Dark Mode</span>
+      </button>
     </div>
   </nav>
 
@@ -622,7 +695,7 @@
     
     <div class="donation-box">
       <div style="font-size:0.9em;color:#666;margin-bottom:8px;">
-        Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">nifftyswiggle</a>
+        Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a>
       </div>
       <div style="font-size:0.9em;color:#666;margin-bottom:8px;">
         💝 Support this project with a donation:
@@ -636,6 +709,35 @@
   </footer>
 
   <script>
+    // Theme toggle functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon(newTheme);
+    }
+    
+    function updateThemeIcon(theme) {
+      const text = document.getElementById('theme-text');
+      text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+    
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeIcon(savedTheme);
+      
+      // Add smooth scroll animation for cards
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
+      });
+    });
+    
     function copyDonationAddress() {
       const address = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
       navigator.clipboard.writeText(address).then(() => {
@@ -644,14 +746,6 @@
         setTimeout(() => { feedback.style.visibility = 'hidden'; }, 2000);
       });
     }
-
-    // Add smooth scroll animation
-    document.addEventListener('DOMContentLoaded', function() {
-      const cards = document.querySelectorAll('.card');
-      cards.forEach((card, index) => {
-        card.style.animation = `fadeInUp 0.6s ease-out ${index * 0.1}s both`;
-      });
-    });
   </script>
 </body>
 </html>
