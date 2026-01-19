@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempo Plug-and-Play Payment Kits</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrjs2@0.1.0/qrjs2.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tempo-xyz/sdk@latest/dist/tempo-sdk.umd.js"></script>
+  <style>
+    :root {
+      --tempo-blue: #1e90ff;
+      --tempo-cyan: #00e0d3;
+      --tempo-bg: #f7fafd;
+      --tempo-card: #fff;
+      --tempo-radius: 16px;
+      --tempo-shadow: 0 4px 32px rgba(30,144,255,0.12);
+      --text-primary: #222;
+      --text-secondary: #444;
+      --text-tertiary: #555;
+      --demo-box-bg: #f4f8fb;
+    }
+    
+    [data-theme="dark"] {
+      --tempo-bg: #0a0e1a;
+      --tempo-card: #151b2e;
+      --tempo-shadow: 0 4px 32px rgba(0,0,0,0.5);
+      --text-primary: #e8eaed;
+      --text-secondary: #c4c7cc;
+      --text-tertiary: #9aa0a6;
+      --demo-box-bg: #1a2235;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--tempo-bg); color: var(--text-primary); margin: 0; transition: background-color 0.3s ease, color 0.3s ease; }
+    .navbar { position: sticky; top: 0; background: var(--tempo-card); box-shadow: 0 2px 8px rgba(30,144,255,0.08); z-index: 10; display: flex; align-items: center; padding: 0 32px; height: 60px; transition: background-color 0.3s ease; }
+    .navbar a { color: var(--tempo-blue); text-decoration: none; font-weight: 600; margin-right: 32px; font-size: 1.08rem; transition: color 0.2s; }
+    .navbar a:hover { color: var(--tempo-cyan); }
+    .theme-toggle { background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: white; box-shadow: 0 2px 8px rgba(30,144,255,0.3); margin-left: auto; white-space: nowrap; }
+    .theme-toggle:hover { transform: scale(1.05); }
+    .hero { text-align: center; padding: 56px 16px 32px 16px; }
+    .hero h1 { color: var(--tempo-blue); font-size: 2.8rem; margin-bottom: 8px; }
+    .hero p { color: #444; font-size: 1.2rem; }
+    .section { max-width: 900px; margin: 48px auto; background: var(--tempo-card); border-radius: var(--tempo-radius); box-shadow: var(--tempo-shadow); padding: 40px 32px; transition: background-color 0.3s ease; }
+    .section h2 { color: var(--tempo-cyan); font-size: 2rem; margin-top: 0; }
+    .section .desc { color: var(--text-tertiary); margin-bottom: 18px; }
+    .demo-box { background: var(--demo-box-bg); border-radius: 12px; padding: 24px; margin-bottom: 24px; transition: background-color 0.3s ease; }
+    .tempo-btn { background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%); color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-weight: 600; font-size: 1rem; box-shadow: 0 2px 8px rgba(30,144,255,0.15); cursor: pointer; transition: background 0.2s; }
+    .tempo-btn:active { background: var(--tempo-blue); }
+    .modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--tempo-card); border-radius: 16px; padding: 32px; min-width: 320px; box-shadow: var(--tempo-shadow); text-align: center; transition: background-color 0.3s ease; }
+    .modal img { margin: 16px 0; }
+    .close-btn { background: none; color: var(--tempo-blue); border: none; font-weight: 600; cursor: pointer; margin-top: 16px; }
+    pre { background: var(--demo-box-bg); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.98em; transition: background-color 0.3s ease; }
+    .setup-guide { margin-top: 24px; }
+    .setup-guide h4 { margin-bottom: 8px; color: var(--tempo-blue); }
+    .code-tabs { display: flex; gap: 8px; margin-bottom: 8px; }
+    .code-tabs button { background: #eaf4fb; border: none; border-radius: 6px 6px 0 0; padding: 6px 16px; font-weight: 600; color: #1e90ff; cursor: pointer; }
+    .code-tabs button.active { background: #fff; color: #00e0d3; }
+    @media (max-width: 700px) {
+      .section { padding: 24px 6px; }
+      .navbar { padding: 0 8px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" style="font-weight:700;">⚡ Tempo Hub</a>
+    <a href="#shopify">Shopify</a>
+    <a href="#woocommerce">WooCommerce</a>
+    <a href="#custom">Custom HTML/JS</a>
+    <a href="#mobile">Mobile</a>
+    <a href="#pos">POS</a>
+    <a href="https://docs.tempo.xyz/" target="_blank">Tempo Docs ↗</a>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+      <span id="theme-text">Dark Mode</span>
+    </button>
+  </nav>
+  <div class="hero">
+    <h1>Tempo Plug-and-Play Payment Kits</h1>
+    <p>Accept stablecoin payments in minutes. <br> Copy, deploy, and go live on the Tempo testnet.</p>
+  </div>
+  <!-- Getting Started Section -->
+  <section class="section">
+    <h2>🚀 Getting Started with Tempo</h2>
+    <div class="desc">
+      <p><strong>What is Tempo?</strong><br>
+      Tempo is a blockchain network designed for instant, low-cost stablecoin payments. It uses TIP-20 tokens (like alphaUSD, betaUSD) that represent real USD value, making crypto payments as simple as traditional payments.</p>
+      
+      <p><strong>Tempo Testnet</strong><br>
+      The testnet allows you to test payments with fake money before going live. Perfect for developers and merchants to integrate and test Tempo payments risk-free.</p>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
+      <div style="text-align:center;padding:20px;background:#f4f8fb;border-radius:12px;">
+        <h4 style="margin-top:0;color:var(--tempo-blue);">Step 1: Add Tempo Testnet</h4>
+        <div id="setup-qr-network"></div>
+        <script>
+          const setupNetworkUrl = 'https://docs.tempo.xyz/quickstart/connection-details';
+          document.getElementById('setup-qr-network').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(setupNetworkUrl)}&size=180x180" style="margin:12px 0;">`;
+        </script>
+        <p style="color:#555;font-size:0.95em;margin-bottom:0;">Scan to add Tempo Testnet to your MetaMask or mobile wallet</p>
+      </div>
+      
+      <div style="text-align:center;padding:20px;background:#f4f8fb;border-radius:12px;">
+        <h4 style="margin-top:0;color:var(--tempo-cyan);">Step 2: Get Free Test Funds</h4>
+        <div id="setup-qr-faucet"></div>
+        <script>
+          const setupFaucetUrl = 'https://docs.tempo.xyz/quickstart/faucet';
+          document.getElementById('setup-qr-faucet').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(setupFaucetUrl)}&size=180x180" style="margin:12px 0;">`;
+        </script>
+        <p style="color:#555;font-size:0.95em;margin-bottom:0;">Scan to get free alphaUSD testnet tokens for testing payments</p>
+      </div>
+    </div>
+    
+    <div style="margin-top:24px;padding:16px;background:#e8f4fd;border-left:4px solid var(--tempo-blue);border-radius:8px;">
+      <strong>💡 Quick Start:</strong> Connect your wallet to Tempo Testnet, get free tokens from the faucet, then scroll down to test the payment templates below!
+    </div>
+  </section>
+  <!-- Shopify Section -->
+  <section class="section" id="shopify">
+    <h2>🧩 Shopify Integration Template</h2>
+    <div class="desc">A Shopify App and Checkout Extension to add “Pay with Tempo” at checkout.</div>
+    <div class="demo-box">
+      <button class="tempo-btn" onclick="alert('This is a demo. In production, the button is injected by the Shopify app.')">Pay with Tempo (Demo)</button>
+      <div style="margin-top:12px;color:#888;font-size:0.98em;">Demo only. See code and setup below.</div>
+    </div>
+    <div class="setup-guide">
+      <h4>Setup Guide</h4>
+      <ol>
+        <li>Install the Shopify app (see backend code below).</li>
+        <li>Set your merchant wallet in the app settings.</li>
+        <li>Test payments using the testnet QR code or wallet connect.</li>
+      </ol>
+    </div>
+    <div class="code-tabs">
+      <button onclick="showCode('shopify-frontend')" class="active">Checkout Extension (JS)</button>
+      <button onclick="showCode('shopify-backend')">Backend (Node.js)</button>
+    </div>
+    <pre id="shopify-frontend" class="code-block"><code class="language-js">// Injected by Shopify Checkout Extension
+// Uses Tempo transfer (direct wallet payment)
+const TIP20_ABI = [
+  "function transfer(address to, uint256 amount) external returns (bool)"
+];
+
+const payBtn = document.createElement('button');
+payBtn.innerText = 'Pay with Tempo';
+payBtn.className = 'tempo-btn';
+payBtn.onclick = async () => {
+  const orderTotal = 100; // Get from Shopify checkout
+  const tokenAddress = '0x20c0000000000000000000000000000000000001'; // AlphaUSD
+  const merchantAddress = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+  
+  if (!window.ethereum) {
+    alert('MetaMask not found.');
+    return;
+  }
+  
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send('eth_requestAccounts', []);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(tokenAddress, TIP20_ABI, signer);
+  const amountUnits = ethers.utils.parseUnits(orderTotal.toString(), 6);
+  
+  try {
+    const tx = await contract.transfer(merchantAddress, amountUnits);
+    alert('Payment sent! Waiting for confirmation...');
+    await tx.wait();
+    alert('Payment confirmed! Order complete.');
+    // Redirect to order confirmation page
+  } catch (err) {
+    alert('Payment failed: ' + err.message);
+  }
+};
+document.body.appendChild(payBtn);</code></pre>
+    <pre id="shopify-backend" class="code-block" style="display:none;"><code class="language-js">// OPTIONAL: Node.js backend for payment verification
+// Direct wallet payments don't require a backend,
+// but you can add one to verify transactions on-chain
+
+const express = require('express');
+const { createPublicClient, http } = require('viem');
+const app = express();
+app.use(express.json());
+
+const client = createPublicClient({
+  transport: http('https://rpc.moderato.tempo.xyz')
+});
+
+app.post('/api/shopify/verify-payment', async (req, res) => {
+  const { txHash } = req.body;
+  // Verify transaction on-chain
+  const receipt = await client.getTransactionReceipt({ hash: txHash });
+  if (receipt.status === 'success') {
+    res.json({ status: 'confirmed' });
+  } else {
+    res.json({ status: 'failed' });
+  }
+});
+
+app.listen(4001);
+</code></pre>
+  </section>
+  <!-- WooCommerce Section -->
+  <section class="section" id="woocommerce">
+    <h2>🧱 WooCommerce / WordPress Template</h2>
+    <div class="desc">A WordPress plugin to add Tempo as a payment gateway.</div>
+    <div class="demo-box">
+      <button class="tempo-btn" onclick="alert('This is a demo. In production, the button is rendered by the WordPress plugin.')">Pay with Tempo (Demo)</button>
+      <div style="margin-top:12px;color:#888;font-size:0.98em;">Demo only. See code and setup below.</div>
+    </div>
+    <div class="setup-guide">
+      <h4>Setup Guide</h4>
+      <ol>
+        <li>Upload and activate the plugin (see PHP code below).</li>
+        <li>Configure your merchant wallet in plugin settings.</li>
+        <li>Test payments using the testnet QR code or wallet connect.</li>
+      </ol>
+    </div>
+    <div class="code-tabs">
+      <button onclick="showCode('woo-frontend')" class="active">Checkout Button (JS)</button>
+      <button onclick="showCode('woo-backend')">Plugin (PHP)</button>
+    </div>
+    <pre id="woo-frontend" class="code-block"><code class="language-js">// Rendered by WooCommerce plugin
+// Uses Tempo transfer (direct wallet payment)
+const TIP20_ABI = [
+  "function transfer(address to, uint256 amount) external returns (bool)"
+];
+
+const payBtn = document.createElement('button');
+payBtn.innerText = 'Pay with Tempo';
+payBtn.className = 'tempo-btn';
+payBtn.onclick = async () => {
+  const orderTotal = 100; // Get from WooCommerce cart
+  const tokenAddress = '0x20c0000000000000000000000000000000000001'; // AlphaUSD
+  const merchantAddress = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+  
+  if (!window.ethereum) {
+    alert('MetaMask not found.');
+    return;
+  }
+  
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send('eth_requestAccounts', []);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(tokenAddress, TIP20_ABI, signer);
+  const amountUnits = ethers.utils.parseUnits(orderTotal.toString(), 6);
+  
+  try {
+    const tx = await contract.transfer(merchantAddress, amountUnits);
+    alert('Payment sent! Waiting for confirmation...');
+    await tx.wait();
+    alert('Payment confirmed! Order complete.');
+    // Update order status via WordPress API
+  } catch (err) {
+    alert('Payment failed: ' + err.message);
+  }
+};
+document.body.appendChild(payBtn);</code></pre>
+    <pre id="woo-backend" class="code-block" style="display:none;"><code class="language-php">// OPTIONAL: WordPress plugin for payment verification
+// Direct wallet payments don't require a backend,
+// but you can add one to verify and update order status
+
+add_action('rest_api_init', function() {
+  register_rest_route('tempo/v1', '/verify-payment', array(
+    'methods' => 'POST',
+    'callback' => 'tempo_verify_payment',
+  ));
+});
+
+function tempo_verify_payment($request) {
+  $params = $request->get_json_params();
+  $txHash = $params['txHash'];
+  $orderId = $params['orderId'];
+  
+  // Verify transaction on Tempo blockchain
+  // $receipt = tempo_get_transaction($txHash);
+  // if ($receipt && $receipt->status === 'success') {
+  //   wc_get_order($orderId)->update_status('completed');
+  // }
+  
+  return array('status' => 'confirmed');
+}
+</code></pre>
+  </section>
+  <!-- Custom HTML/JS Section -->
+  <section class="section" id="custom">
+    <h2>🌐 Custom HTML/JS Website Template</h2>
+    <div class="desc">The simplest and most universal template. Copy, paste, and accept Tempo payments anywhere.</div>
+    <div class="demo-box">
+      <div style="margin-bottom:12px;font-weight:600;">Donate to Tempo Testnet Merchant</div>
+      <button class="tempo-btn" id="connectWalletBtn" style="margin-bottom:12px;" onclick="connectWallet()">Connect Wallet</button>
+      <div id="walletStatus" style="margin-bottom:12px;color:#1e90ff;font-weight:500;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+        <button class="tempo-btn" onclick="setDonationAmount(1)">$1</button>
+        <button class="tempo-btn" onclick="setDonationAmount(10)">$10</button>
+        <button class="tempo-btn" onclick="setDonationAmount(100)">$100</button>
+        <input id="custom-amount-input" type="number" min="0.01" step="0.01" placeholder="Custom $" style="width:90px;padding:8px 6px;border-radius:6px;border:1px solid #e0e0e0;font-size:1rem;">
+        <select id="stablecoin-select" style="margin-left:12px;padding:8px 6px;border-radius:6px;border:1px solid #e0e0e0;font-size:1rem;">
+          <option value="alphaUSD">alphaUSD</option>
+          <option value="betaUSD">betaUSD</option>
+          <option value="thetaUSD">thetaUSD</option>
+          <option value="pathUSD">pathUSD</option>
+          <option value="">Other...</option>
+        </select>
+        <input id="custom-token-input" type="text" placeholder="Token Symbol" style="width:90px;padding:8px 6px;border-radius:6px;border:1px solid #e0e0e0;font-size:1rem;display:none;">
+      </div>
+      <!-- Donation Confirmation Modal -->
+      <div id="donationConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+        <div style="background:#fff; padding:2em; border-radius:8px; max-width:350px; margin:auto; text-align:center;">
+          <h3>Confirm Donation</h3>
+          <div id="donationSummary"></div>
+          <button onclick="sendDonationTx()" style="margin-top:1em;">Confirm & Send</button>
+          <button onclick="closeDonationModal()" style="margin-top:0.5em;">Cancel</button>
+        </div>
+      </div>
+      <button class="tempo-btn" id="donateBtn" onclick="showDonationConfirm()">Donate with Tempo</button>
+      <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+      <script>
+      // TIP-20 ABI (only transfer and transferWithMemo)
+      const TIP20_ABI = [
+        "function transfer(address to, uint256 amount) external returns (bool)",
+        "function transferWithMemo(address to, uint256 amount, bytes32 memo) external"
+      ];
+      async function donateWithWallet() {
+        const amount = parseFloat(document.getElementById('custom-amount-input').value) || 0;
+        if (!amount || amount <= 0) {
+          alert('Please enter a valid donation amount.');
+          return;
+        }
+        const tokenAddress = '0x20c0000000000000000000000000000000000001'; // AlphaUSD
+        const merchantAddress = '0xe79F959225B1590b43F440eC1A7c4449D6988322';
+        const memoText = 'DONATION';
+        // Connect to MetaMask
+        if (!window.ethereum) {
+          alert('MetaMask not found.');
+          return;
+        }
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(tokenAddress, TIP20_ABI, signer);
+        // TIP-20 uses 6 decimals
+        const amountUnits = ethers.utils.parseUnits(amount.toString(), 6);
+        // Memo as bytes32
+        let memoBytes32 = ethers.utils.formatBytes32String(memoText);
+        try {
+          // Try transferWithMemo first
+          const tx = await contract.transferWithMemo(merchantAddress, amountUnits, memoBytes32);
+          document.getElementById('custom-status').innerText = 'Transaction sent! Waiting for confirmation...';
+          await tx.wait();
+          document.getElementById('custom-status').innerText = 'Donation confirmed! Thank you.';
+        } catch (err) {
+          // Fallback to transfer if transferWithMemo fails
+          try {
+            const tx = await contract.transfer(merchantAddress, amountUnits);
+            document.getElementById('custom-status').innerText = 'Transaction sent! Waiting for confirmation...';
+            await tx.wait();
+            document.getElementById('custom-status').innerText = 'Donation confirmed! Thank you.';
+          } catch (err2) {
+            document.getElementById('custom-status').innerText = 'Error sending donation: ' + (err2.message || err2);
+          }
+        }
+      }
+      function showDonationConfirm() {
+        const amount = parseFloat(document.getElementById('custom-amount-input').value) || 0;
+        if (!amount || amount <= 0) {
+          alert('Please enter a valid donation amount.');
+          return;
+        }
+        const tokenAddress = '0x20c0000000000000000000000000000000000001'; // AlphaUSD
+        const merchantAddress = '0xe79F959225B1590b43F440eC1A7c4449D6988322';
+        const memoText = 'DONATION';
+        // Show summary
+        document.getElementById('donationSummary').innerHTML = `
+          <b>Amount:</b> ${amount} AlphaUSD<br>
+          <b>USD Value:</b> $${amount}<br>
+          <b>Recipient:</b> ${merchantAddress}<br>
+          <b>Memo:</b> ${memoText}
+        `;
+        document.getElementById('donationConfirmModal').style.display = 'flex';
+      }
+      function closeDonationModal() {
+        document.getElementById('donationConfirmModal').style.display = 'none';
+      }
+      async function sendDonationTx() {
+        closeDonationModal();
+        const amount = parseFloat(document.getElementById('custom-amount-input').value) || 0;
+        const tokenAddress = '0x20c0000000000000000000000000000000000001'; // AlphaUSD
+        const merchantAddress = '0xe79F959225B1590b43F440eC1A7c4449D6988322';
+        if (!window.ethereum) {
+          alert('MetaMask not found.');
+          return;
+        }
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(tokenAddress, TIP20_ABI, signer);
+        const amountUnits = ethers.utils.parseUnits(amount.toString(), 6);
+        try {
+          // Only call transfer, not transferWithMemo
+          const tx = await contract.transfer(merchantAddress, amountUnits);
+          document.getElementById('custom-status').innerText = 'Transaction sent! Waiting for confirmation...';
+          await tx.wait();
+          document.getElementById('custom-status').innerText = 'Donation confirmed! Thank you.';
+        } catch (err) {
+          document.getElementById('custom-status').innerText = 'Error sending donation: ' + (err.message || err);
+        }
+      }
+      </script>
+      <div id="custom-modal-bg" class="modal-bg">
+        <div class="modal">
+          <div id="custom-qr"></div>
+          <div id="custom-status" style="margin-top:12px;"></div>
+          <button class="close-btn" onclick="closeCustomModal()">Close</button>
+        </div>
+      </div>
+    </div>
+    <div class="setup-guide">
+      <h4>Setup Guide</h4>
+      <ol>
+        <li>Copy the HTML/JS snippet below into your site.</li>
+        <li>Set your merchant wallet address in the code.</li>
+        <li>Deploy your backend (Node.js or Python example below).</li>
+        <li>Test payments using the testnet QR code or wallet connect.</li>
+      </ol>
+    </div>
+    <div class="code-tabs">
+      <button onclick="showCode('custom-frontend')" class="active">HTML/JS</button>
+      <button onclick="showCode('custom-backend-node')">Backend (Node.js)</button>
+      <button onclick="showCode('custom-backend-python')">Backend (Python)</button>
+    </div>
+    <pre id="custom-frontend" class="code-block"><code class="language-html">&lt;!-- Add this to your HTML (complete working example) --&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"&gt;&lt;/script&gt;
+&lt;button class="tempo-btn" onclick="openTempoModal()"&gt;Pay with Tempo&lt;/button&gt;
+&lt;div id="tempo-modal-bg" class="modal-bg" style="display:none;"&gt;
+  &lt;div class="modal"&gt;
+    &lt;div id="tempo-status"&gt;&lt;/div&gt;
+    &lt;button class="close-btn" onclick="closeTempoModal()"&gt;Close&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+const TIP20_ABI = [
+  "function transfer(address to, uint256 amount) external returns (bool)"
+];
+
+async function openTempoModal() {
+  document.getElementById('tempo-modal-bg').style.display = 'flex';
+  const amount = 100; // USD amount
+  const tokenAddress = '0x20c0000000000000000000000000000000000001'; // AlphaUSD
+  const merchantAddress = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+  
+  if (!window.ethereum) {
+    document.getElementById('tempo-status').innerText = 'MetaMask not found.';
+    return;
+  }
+  
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
+  await provider.send('eth_requestAccounts', []);
+  const signer = provider.getSigner();
+  const contract = new ethers.Contract(tokenAddress, TIP20_ABI, signer);
+  const amountUnits = ethers.utils.parseUnits(amount.toString(), 6);
+  
+  try {
+    const tx = await contract.transfer(merchantAddress, amountUnits);
+    document.getElementById('tempo-status').innerText = 'Payment sent! Waiting for confirmation...';
+    await tx.wait();
+    document.getElementById('tempo-status').innerText = 'Payment confirmed! Thank you.';
+  } catch (err) {
+    document.getElementById('tempo-status').innerText = 'Payment failed: ' + err.message;
+  }
+}
+function closeTempoModal() {
+  document.getElementById('tempo-modal-bg').style.display = 'none';
+}
+&lt;/script&gt;
+</code></pre>
+    <pre id="custom-backend-node" class="code-block" style="display:none;"><code class="language-js">// OPTIONAL: Node.js backend for payment verification
+// The frontend code works standalone without a backend!
+// Only add this if you need server-side verification
+
+const express = require('express');
+const { createPublicClient, http } = require('viem');
+const app = express();
+app.use(express.json());
+
+const client = createPublicClient({
+  transport: http('https://rpc.moderato.tempo.xyz')
+});
+
+app.post('/api/verify-payment', async (req, res) => {
+  const { txHash } = req.body;
+  // Verify transaction on-chain
+  const receipt = await client.getTransactionReceipt({ hash: txHash });
+  res.json({ 
+    status: receipt.status === 'success' ? 'confirmed' : 'failed',
+    receipt 
+  });
+});
+
+app.listen(4002);
+</code></pre>
+    <pre id="custom-backend-python" class="code-block" style="display:none;"><code class="language-py"># OPTIONAL: Python backend for payment verification
+# The frontend code works standalone without a backend!
+# Only add this if you need server-side verification
+
+from flask import Flask, request, jsonify
+from web3 import Web3
+
+app = Flask(__name__)
+w3 = Web3(Web3.HTTPProvider('https://rpc.moderato.tempo.xyz'))
+
+@app.route('/api/verify-payment', methods=['POST'])
+def verify_payment():
+    data = request.get_json()
+    tx_hash = data['txHash']
+    # Verify transaction on-chain
+    receipt = w3.eth.get_transaction_receipt(tx_hash)
+    status = 'confirmed' if receipt.status == 1 else 'failed'
+    return jsonify(status=status, receipt=receipt)
+
+if __name__ == '__main__':
+    app.run(port=4003)
+</code></pre>
+  </section>
+  <!-- Mobile Section -->
+  <section class="section" id="mobile">
+    <h2>📱 Mobile Integration Template</h2>
+    <div class="desc">Integrate Tempo payments into your mobile app using the Tempo SDK, Wagmi, or WalletConnect. Use transfer/transferWithMemo for all payments.</div>
+    <div class="demo-box">
+      <div style="margin-bottom:24px;">
+        <div style="margin-bottom:12px;font-weight:600;">🌐 Pay with Tempo Testnet</div>
+        <div id="mobile-qr-network"></div>
+      
+      <div style="border-top:1px solid #e0e0e0;padding-top:24px;margin-bottom:24px;">
+        <div style="margin-bottom:12px;font-weight:600;">Scan to Pay (Any Amount)</div>
+        <div id="mobile-qr-container"></div>
+        <script>
+          // Generate QR code with just the wallet address
+          const walletAddress = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+          document.getElementById('mobile-qr-container').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(walletAddress)}&size=200x200" style="margin-bottom:12px;">`;
+        </script>
+        <div style="color:#888;font-size:0.98em;">Scan with a Tempo-compatible wallet to send payment to<br>0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f<br>(Enter amount in your wallet)</div>
+      </div>
+      <div style="border-top:1px solid #e0e0e0;padding-top:24px;">
+        <div style="margin-bottom:12px;font-weight:600;">Scan to Pay $10 (AlphaUSD) MetaMask </div>
+        <div id="mobile-qr-10"></div>
+        <script>
+          // Generate QR code with complete payment request using EIP-681
+          // This pre-fills token, recipient, and amount
+          const tokenAddress = '0x20C0000000000000000000000000000000000001';
+          const recipientAddress = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+          const amount = '10000000'; // $10 with 6 decimals
+          const chainId = '41144'; // Tempo testnet
+          const paymentUri = `ethereum:${tokenAddress}@${chainId}/transfer?address=${recipientAddress}&uint256=${amount}`;
+          document.getElementById('mobile-qr-10').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(paymentUri)}&size=200x200" style="margin-bottom:12px;">`;
+        </script>
+        <div style="color:#888;font-size:0.98em;">Scan to send $10 in AlphaUSD (TIP-20) - everything pre-filled, just confirm!</div>
+      </div>
+    </div>
+    <div class="setup-guide">
+      <h4>Setup Guide</h4>
+      <ol>
+        <li>Install the Tempo SDK or Wagmi in your mobile project.</li>
+        <li>Use <code>transfer</code> or <code>transferWithMemo</code> for all payments. Example:</li>
+      </ol>
+      <pre><code class="language-ts">import { Hooks } from 'wagmi/tempo'
+import { parseUnits } from 'viem'
+
+function SendPayment() {
+  const sendPayment = Hooks.token.useTransferSync()
+  return (
+    &lt;form onSubmit={event =&gt; {
+      event.preventDefault()
+      const formData = new FormData(event.target as HTMLFormElement)
+      const recipient = (formData.get('recipient') || '0x000...') as `0x${string}`
+      sendPayment.mutate({
+        amount: parseUnits('100', 6),
+        to: recipient,
+        token: '0x20c0000000000000000000000000000000000001',
+      })
+    }}&gt;
+      {/* ...form fields... */}
+    &lt;/form&gt;
+  )
+}
+</code></pre>
+      <ol start="3">
+        <li>For cross-stable payments, use the DEX to swap tokens if needed.</li>
+      </ol>
+    </div>
+  </section>
+  <!-- POS Section -->
+  <section class="section" id="pos">
+    <h2>🖥️ Point of Sale (POS) Template</h2>
+    <div class="desc">Accept Tempo payments at your physical location with a simple POS interface. Use transfer/transferWithMemo for all payments.</div>
+    <div class="demo-box">
+      <button class="tempo-btn" onclick="openPosModal()">New POS Payment (Demo)</button>
+      <div id="pos-modal-bg" class="modal-bg">
+        <div class="modal">
+          <div id="pos-qr"></div>
+          <div id="pos-status" style="margin-top:12px;"></div>
+          <button class="close-btn" onclick="closePosModal()">Close</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;color:#888;font-size:0.98em;">Demo only. See code and setup below.</div>
+    </div>
+    <div class="setup-guide">
+      <h4>Setup Guide</h4>
+      <ol>
+        <li>Deploy the POS web app or use the code below.</li>
+        <li>Set your merchant wallet address in the code.</li>
+        <li>Use <code>transfer</code> or <code>transferWithMemo</code> for all payments. Example:</li>
+      </ol>
+      <pre><code class="language-js">import { parseUnits } from 'viem'
+import { client } from './viem.config'
+
+const { receipt } = await client.token.transferSync({
+  amount: parseUnits('100', 6),
+  to: '0xRecipientAddress',
+  token: '0x20c0000000000000000000000000000000000001',
+})
+</code></pre>
+      <ol start="4">
+        <li>For cross-stable payments, use the DEX to swap tokens if needed.</li>
+      </ol>
+    </div>
+  </section>
+  <footer style="text-align:center;color:#888;padding:32px 0 16px 0;font-size:0.98em;">
+    Built for the Tempo testnet. <a href="https://docs.tempo.xyz/" target="_blank" style="color:#1e90ff;">Tempo Developer Docs</a><br>
+    <span style="color:#1e90ff;">For full wallet integration and payment flows, use <a href='https://wagmi.sh/tempo' target='_blank'>Wagmi</a>, <a href='https://thirdweb.com/tempo-testnet' target='_blank'>thirdweb</a>, or <a href='https://viem.sh/tempo' target='_blank'>Viem</a> as recommended in the <a href='https://docs.tempo.xyz/sdk/typescript' target='_blank'>Tempo SDK docs</a>.</span>
+    <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e0e0e0;">
+      <div style="font-size:0.9em;color:#666;margin-bottom:8px;">💝 Support this project with a donation:</div>
+      <div style="display:inline-flex;align-items:center;background:#f4f8fb;padding:8px 12px;border-radius:8px;font-family:monospace;font-size:0.9em;color:#222;">
+        <span id="donation-address">0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f</span>
+        <button onclick="copyDonationAddress()" style="margin-left:8px;background:var(--tempo-blue);color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:0.85em;">Copy</button>
+      </div>
+      <div id="copy-feedback" style="color:var(--tempo-cyan);font-size:0.85em;margin-top:8px;visibility:hidden;">✓ Address copied!</div>
+    </div>
+  </footer>
+  <script>
+    function copyDonationAddress() {
+      const address = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+      navigator.clipboard.writeText(address).then(() => {
+        const feedback = document.getElementById('copy-feedback');
+        feedback.style.visibility = 'visible';
+        setTimeout(() => { feedback.style.visibility = 'hidden'; }, 2000);
+      });
+    }
+  </script>
+  <script>
+        // MetaMask connect logic (global)
+        window.connectWallet = async function() {
+          const statusEl = document.getElementById('walletStatus');
+          if (typeof window.ethereum === 'undefined' || !window.ethereum.isMetaMask) {
+            statusEl.innerText = 'MetaMask not found. Please install MetaMask.';
+            return;
+          }
+          // Fetch chainId from RPC
+          let detectedChainId = null;
+          try {
+            const res = await fetch('https://rpc.moderato.tempo.xyz', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ "jsonrpc": "2.0", "method": "eth_chainId", "params": [], "id": 1 })
+            });
+            const data = await res.json();
+            detectedChainId = data.result;
+          } catch (rpcErr) {
+            statusEl.innerText = 'Failed to fetch chainId from RPC.';
+            return;
+          }
+          try {
+            // Request account connection
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            statusEl.innerText = 'MetaMask connected: ' + accounts[0];
+            // Check if Tempo Testnet is selected
+            if (window.ethereum.chainId !== detectedChainId) {
+              try {
+                await window.ethereum.request({
+                  method: 'wallet_switchEthereumChain',
+                  params: [{ chainId: detectedChainId }]
+                });
+                statusEl.innerText += '\nSwitched to Tempo Testnet.';
+              } catch (switchError) {
+                if (switchError.code === 4902) {
+                  // Add the chain if not present
+                  try {
+                    await window.ethereum.request({
+                      method: 'wallet_addEthereumChain',
+                      params: [{
+                        chainId: detectedChainId,
+                        chainName: 'Tempo Testnet (Moderato)',
+                        nativeCurrency: { name: 'USD', symbol: 'USD', decimals: 18 },
+                        rpcUrls: ['https://rpc.moderato.tempo.xyz'],
+                        blockExplorerUrls: ['https://explore.tempo.xyz']
+                      }]
+                    });
+                    statusEl.innerText += '\nTempo Testnet added.';
+                    // Switch again after adding
+                    await window.ethereum.request({
+                      method: 'wallet_switchEthereumChain',
+                      params: [{ chainId: detectedChainId }]
+                    });
+                    statusEl.innerText += '\nSwitched to Tempo Testnet.';
+                  } catch (addError) {
+                    statusEl.innerText += '\nFailed to add/switch to Tempo Testnet: ' + (addError.message || addError);
+                    return;
+                  }
+                } else {
+                  statusEl.innerText += '\nFailed to switch to Tempo Testnet: ' + (switchError.message || switchError);
+                  return;
+                }
+              }
+            } else {
+              statusEl.innerText += '\nTempo Testnet already selected.';
+            }
+          } catch (err) {
+            statusEl.innerText = 'MetaMask connection failed: ' + (err.message || err);
+          }
+        }
+    
+    
+        // Ensure connectWallet is attached after DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+          var connectBtn = document.getElementById('connectWalletBtn');
+          if (connectBtn) connectBtn.onclick = window.connectWallet;
+        });
+    // Highlight.js init
+    document.querySelectorAll('pre code').forEach((el) => { hljs.highlightElement(el); });
+    // Code tab logic
+    function showCode(id) {
+      document.querySelectorAll('.code-block').forEach(el => el.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+      document.querySelectorAll('.code-tabs button').forEach(btn => btn.classList.remove('active'));
+      const idx = id.indexOf('-');
+      const prefix = id.slice(0, idx);
+      document.querySelectorAll('.code-tabs').forEach(tabs => {
+        tabs.querySelectorAll('button').forEach(btn => {
+          if (btn.textContent.toLowerCase().includes(id.split('-')[1])) btn.classList.add('active');
+        });
+      });
+    }
+    // Donation widget logic
+    let donationAmount = 1;
+    function setDonationAmount(val) {
+      donationAmount = val;
+      document.getElementById('custom-amount-input').value = val;
+    }
+    document.getElementById('custom-amount-input').addEventListener('input', function(e) {
+      donationAmount = parseFloat(e.target.value) || 0;
+    });
+    async function openCustomModal() {
+      if (!donationAmount || donationAmount <= 0) {
+        alert('Please enter a valid donation amount.');
+        return;
+      }
+      document.getElementById('custom-modal-bg').style.display = 'flex';
+      document.getElementById('custom-status').innerText = '';
+      document.getElementById('custom-qr').innerHTML = '';
+      // Use Tempo SDK to create a payment request on testnet
+      try {
+        const tempo = window.Tempo;
+        const payment = await tempo.createPaymentRequest({
+          amount: donationAmount,
+          currency: 'USD',
+          merchantWallet: '0xe79F959225B1590b43F440eC1A7c4449D6988322',
+          network: 'testnet'
+        });
+        const qr = payment.qr || payment.paymentUrl || payment.url || payment.paymentLink || payment.id || 'https://testnet.tempo.com/qr/demo123';
+        document.getElementById('custom-qr').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&amp;size=200x200">`;
+        document.getElementById('custom-status').innerText = 'Waiting for payment...';
+        let confirmed = false;
+        while (!confirmed) {
+          const status = await tempo.verifyPayment(payment.paymentId || payment.id);
+          if (status && (status.status === 'confirmed' || status.status === 'success')) {
+            document.getElementById('custom-status').innerText = 'Payment confirmed! Thank you for your donation.';
+            confirmed = true;
+          } else {
+            await new Promise(r => setTimeout(r, 2000));
+          }
+        }
+      } catch (e) {
+        document.getElementById('custom-status').innerText = 'Error creating payment: ' + (e.message || e);
+      }
+    }
+    function closeCustomModal() {
+      document.getElementById('custom-modal-bg').style.display = 'none';
+    }
+    // POS demo modal logic
+    async function openPosModal() {
+      document.getElementById('pos-modal-bg').style.display = 'flex';
+      document.getElementById('pos-status').innerText = '';
+      document.getElementById('pos-qr').innerHTML = '';
+      // Simulate backend call
+      const paymentId = 'demo123';
+      const qr = 'https://testnet.tempo.com/qr/demo123';
+      document.getElementById('pos-qr').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qr)}&amp;size=200x200">`;
+      document.getElementById('pos-status').innerText = 'Waiting for payment...';
+      setTimeout(() => {
+        document.getElementById('pos-status').innerText = 'Payment confirmed!';
+      }, 2000);
+    }
+    function closePosModal() {
+      document.getElementById('pos-modal-bg').style.display = 'none';
+    }
+    
+    // Theme toggle functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeText(newTheme);
+    }
+    
+    function updateThemeText(theme) {
+      const text = document.getElementById('theme-text');
+      text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+    
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeText(savedTheme);
+    });
+  </script>
+  <footer style="text-align:center;padding:24px;color:#888;font-size:0.9em;">
+    © 2026 Tempo Developer Hub. Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a>. All rights reserved.
+  </footer>
+</body>
+</html>

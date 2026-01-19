@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempo Marketplace Demo</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600&display=swap">
+  <style>
+    :root {
+      --bg-color: #f7fafd;
+      --card-bg: #fff;
+      --text-primary: #222;
+      --text-secondary: #555;
+      --border-color: #e0e0e0;
+      --item-bg: #f4f8fb;
+    }
+    
+    [data-theme="dark"] {
+      --bg-color: #0a0e1a;
+      --card-bg: #151b2e;
+      --text-primary: #e8eaed;
+      --text-secondary: #9aa0a6;
+      --border-color: #2a3347;
+      --item-bg: #1a2235;
+    }
+    
+    body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-primary); margin: 0; transition: background-color 0.3s ease, color 0.3s ease; }
+    .navbar { background: var(--card-bg); box-shadow: 0 2px 8px rgba(30,144,255,0.08); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; transition: background-color 0.3s ease; }
+    .navbar h1 { color: #1e90ff; font-size: 2rem; margin: 0; }
+    .navbar-right { display: flex; align-items: center; gap: 16px; }
+    .navbar a { color: #1e90ff; text-decoration: none; font-weight: 700; font-size: 1.1rem; transition: color 0.2s; }
+    .navbar a:hover { color: #00e0d3; }
+    .theme-toggle { background: linear-gradient(135deg, #1e90ff 0%, #00e0d3 100%); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: white; box-shadow: 0 2px 8px rgba(30,144,255,0.3); white-space: nowrap; }
+    .theme-toggle:hover { transform: scale(1.05); }
+    .container { max-width: 900px; margin: 32px auto; background: var(--card-bg); border-radius: 16px; box-shadow: 0 4px 32px rgba(30,144,255,0.12); padding: 32px; transition: background-color 0.3s ease; }
+    .item-list { margin-bottom: 32px; }
+    .item { background: var(--item-bg); border-radius: 12px; padding: 20px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; transition: background-color 0.3s ease; }
+    .item-info { flex: 1; }
+    .item-title { font-weight: 600; font-size: 1.2rem; margin-bottom: 6px; }
+    .item-desc { color: var(--text-secondary); margin-bottom: 8px; }
+    .item-price { color: #1e90ff; font-weight: 600; font-size: 1.1rem; }
+    .tempo-btn { background: linear-gradient(90deg, #1e90ff 0%, #00e0d3 100%); color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; font-size: 1rem; cursor: pointer; }
+    .modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); align-items: center; justify-content: center; z-index: 1000; }
+    .modal { background: var(--card-bg); border-radius: 16px; padding: 32px; min-width: 320px; box-shadow: 0 4px 32px rgba(30,144,255,0.12); text-align: center; transition: background-color 0.3s ease; }
+    .close-btn { background: none; color: #1e90ff; border: none; font-weight: 600; cursor: pointer; margin-top: 16px; }
+    .form-section { margin-bottom: 32px; }
+    .form-section input, .form-section textarea, .form-section select { width: 100%; padding: 8px; margin-bottom: 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 1rem; background: var(--item-bg); color: var(--text-primary); transition: background-color 0.3s ease, border-color 0.3s ease; }
+    .form-section label { font-weight: 600; margin-bottom: 4px; display: block; }
+    .loading { display: inline-block; width: 32px; height: 32px; border: 4px solid #1e90ff; border-top: 4px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <h1>Tempo Marketplace Demo</h1>
+    <div class="navbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="theme-text">Dark Mode</span>
+      </button>
+      <a href="index.html">⚡ Tempo Hub</a>
+    </div>
+  </div>
+  <div class="container">
+    <div class="form-section">
+      <h2>List an Item for Sale</h2>
+      <form id="listForm">
+        <label for="itemTitle">Title</label>
+        <input id="itemTitle" required>
+        <label for="itemDesc">Description</label>
+        <textarea id="itemDesc" rows="2" required></textarea>
+        <label for="itemType">Type</label>
+        <select id="itemType" onchange="toggleNetworkField()">
+          <option value="physical">Physical Item</option>
+          <option value="nft">NFT</option>
+          <option value="crypto">Crypto</option>
+        </select>
+        <div id="networkField" style="display:none;">
+          <label for="itemNetwork">Network</label>
+          <input id="itemNetwork" placeholder="e.g. Ethereum, Solana, Tempo">
+        </div>
+        <label for="itemPrice">Price (AlphaUSD)</label>
+        <input id="itemPrice" type="number" min="0.01" step="0.01" required>
+        <label for="itemSeller">Seller Wallet Address</label>
+        <input id="itemSeller" required>
+        <button class="tempo-btn" type="submit">List Item</button>
+      </form>
+    </div>
+    <div class="section-title">Active Listings</div>
+    <div class="item-list" id="itemList"></div>
+    <div class="section-title">Sold Listings</div>
+    <div class="item-list" id="soldList"></div>
+  </div>
+  <div id="payModalBg" class="modal-bg">
+    <div class="modal">
+      <h3>Pay with Tempo</h3>
+      <div id="payModalContent"></div>
+      <div id="payLoading" style="margin:12px;"></div>
+      <button class="close-btn" onclick="closePayModal()">Close</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script>
+    // TIP-20 ABI with memo support
+    const TIP20_ABI = [
+      "function transfer(address to, uint256 amount) external returns (bool)",
+      "function transfer(address to, uint256 amount, bytes calldata memo) external returns (bool)"
+    ];
+    
+    const MERCHANT_ADDRESS = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
+    
+    let items = [
+      // Pre-populated NFT listings at $10 each
+      {
+        title: 'Tempo Genesis NFT #001',
+        desc: 'Rare genesis collection NFT on Tempo blockchain',
+        type: 'nft',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '🖼️'
+      },
+      {
+        title: 'Crypto Punks Style Avatar',
+        desc: 'Unique 24x24 pixel art avatar NFT',
+        type: 'nft',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '👾'
+      },
+      {
+        title: 'Digital Art: Blockchain Dreams',
+        desc: 'Abstract digital artwork celebrating blockchain technology',
+        type: 'nft',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '🎨'
+      },
+      {
+        title: 'Music NFT: Tempo Beat',
+        desc: 'Exclusive music track as NFT with royalty rights',
+        type: 'nft',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '🎵'
+      },
+      // Pre-populated Crypto listings at $10 each
+      {
+        title: '$10 AlphaUSD',
+        desc: '10 AlphaUSD stablecoin tokens on Tempo',
+        type: 'crypto',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '💵'
+      },
+      {
+        title: '$10 BetaUSD',
+        desc: '10 BetaUSD stablecoin tokens on Tempo',
+        type: 'crypto',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '💰'
+      },
+      {
+        title: '$10 Worth of Tempo Tokens',
+        desc: 'Tempo network utility tokens for gas fees',
+        type: 'crypto',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '⚡'
+      },
+      {
+        title: 'Crypto Starter Pack',
+        desc: 'Mixed bag of testnet tokens for development',
+        type: 'crypto',
+        price: 10,
+        seller: MERCHANT_ADDRESS,
+        network: 'Tempo',
+        image: '🎁'
+      }
+    ];
+    let soldItems = [];
+    function toggleNetworkField() {
+      const type = document.getElementById('itemType').value;
+      document.getElementById('networkField').style.display = (type === 'nft' || type === 'crypto') ? 'block' : 'none';
+    }
+    // Call on page load in case default is nft/crypto
+    toggleNetworkField();
+    function renderItems() {
+      const list = document.getElementById('itemList');
+      list.innerHTML = '';
+      if (items.length === 0) {
+        list.innerHTML = '<div style="color:#888;text-align:center;">No active listings yet.</div>';
+      } else {
+        items.forEach((item, idx) => {
+          const emoji = item.image || '📦';
+          list.innerHTML += `<div class='item'>
+            <div style='font-size:3rem;margin-right:20px;'>${emoji}</div>
+            <div class='item-info'>
+              <div class='item-title'>${item.title}</div>
+              <div class='item-desc'>${item.desc}</div>
+              <div><b>Type:</b> ${item.type.toUpperCase()}</div>
+              ${(item.type === 'nft' || item.type === 'crypto') ? `<div><b>Network:</b> ${item.network}</div>` : ''}
+              <div class='item-price'>$${item.price} AlphaUSD</div>
+              <div style='font-size:0.85rem;color:#666;'><b>Seller:</b> ${item.seller.slice(0,6)}...${item.seller.slice(-4)}</div>
+            </div>
+            <button class='tempo-btn' onclick='openPayModal(${idx})'>Buy Now</button>
+          </div>`;
+        });
+      }
+      const soldList = document.getElementById('soldList');
+      soldList.innerHTML = '';
+      if (soldItems.length === 0) {
+        soldList.innerHTML = '<div style="color:#888;text-align:center;">No sold listings yet.</div>';
+      } else {
+        soldItems.forEach((item) => {
+          const emoji = item.image || '📦';
+          soldList.innerHTML += `<div class='item' style='opacity:0.7;'>
+            <div style='font-size:3rem;margin-right:20px;'>${emoji}</div>
+            <div class='item-info'>
+              <div class='item-title'>${item.title}</div>
+              <div class='item-desc'>${item.desc}</div>
+              <div><b>Type:</b> ${item.type.toUpperCase()}</div>
+              ${(item.type === 'nft' || item.type === 'crypto') ? `<div><b>Network:</b> ${item.network}</div>` : ''}
+              <div class='item-price'>$${item.price} AlphaUSD</div>
+              <div style='color:#28a745;font-weight:600;margin-top:8px;'>✅ SOLD</div>
+            </div>
+          </div>`;
+        });
+      }
+    }
+    document.getElementById('listForm').onsubmit = function(e) {
+      e.preventDefault();
+      const title = document.getElementById('itemTitle').value.trim();
+      const desc = document.getElementById('itemDesc').value.trim();
+      const type = document.getElementById('itemType').value;
+      const price = parseFloat(document.getElementById('itemPrice').value);
+      const seller = document.getElementById('itemSeller').value.trim();
+      let network = '';
+      if (type === 'nft' || type === 'crypto') {
+        network = document.getElementById('itemNetwork').value.trim();
+        if (!network) return;
+      }
+      if (!title || !desc || !seller || !price || price <= 0) return;
+      items.push({ title, desc, type, price, seller, network });
+      renderItems();
+      this.reset();
+      toggleNetworkField();
+    };
+    function openPayModal(idx) {
+      const item = items[idx];
+      const emoji = item.image || '📦';
+      document.getElementById('payModalBg').style.display = 'flex';
+      document.getElementById('payModalContent').innerHTML = `
+        <div style='font-size:4rem;margin-bottom:12px;'>${emoji}</div>
+        <div style='margin-bottom:10px;'><b>Item:</b> ${item.title}</div>
+        <div style='margin-bottom:10px;'><b>Type:</b> ${item.type.toUpperCase()}</div>
+        ${(item.type === 'nft' || item.type === 'crypto') ? `<div style='margin-bottom:10px;'><b>Network:</b> ${item.network}</div>` : ''}
+        <div style='margin-bottom:10px;'><b>Price:</b> $${item.price} AlphaUSD</div>
+        <div style='margin-bottom:16px;font-size:0.9rem;color:#666;'><b>Seller:</b> ${item.seller.slice(0,6)}...${item.seller.slice(-4)}</div>
+        <div style='margin-bottom:12px;text-align:left;padding:12px;background:#f4f8fb;border-radius:8px;'>
+          <div style='font-size:0.9rem;color:#666;margin-bottom:4px;'><b>📝 Purchase Memo:</b></div>
+          <div style='font-size:0.85rem;font-style:italic;'>"Purchasing: ${item.title} - ${item.type.toUpperCase()} on ${item.network || 'Tempo'}"</div>
+        </div>
+        <button class='tempo-btn' onclick='payForItem(${idx})'>Confirm Payment</button>
+      `;
+      document.getElementById('payLoading').innerHTML = '';
+    }
+    function closePayModal() {
+      document.getElementById('payModalBg').style.display = 'none';
+    }
+    async function payForItem(idx) {
+      const item = items[idx];
+      const payLoading = document.getElementById('payLoading');
+      payLoading.innerHTML = '<div class="loading"></div> Connecting to wallet...';
+      if (!window.ethereum) {
+        payLoading.innerHTML = '❌ MetaMask not found. Please install MetaMask.';
+        return;
+      }
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+        const signer = provider.getSigner();
+        const buyerAddress = await signer.getAddress();
+        
+        // AlphaUSD token contract
+        const contract = new ethers.Contract('0x20c0000000000000000000000000000000000001', TIP20_ABI, signer);
+        const amountUnits = ethers.utils.parseUnits(item.price.toString(), 6);
+        
+        // Create memo with purchase details
+        const memoText = `Purchasing: ${item.title} - ${item.type.toUpperCase()} on ${item.network || 'Tempo'}`;
+        const memoBytes = ethers.utils.toUtf8Bytes(memoText);
+        
+        payLoading.innerHTML = '<div class="loading"></div> Sending payment with memo...';
+        
+        // Try to send with memo first, fallback to regular transfer
+        let tx;
+        try {
+          tx = await contract['transfer(address,uint256,bytes)'](item.seller, amountUnits, memoBytes);
+        } catch (memoErr) {
+          console.log('Memo transfer not supported, using regular transfer');
+          tx = await contract['transfer(address,uint256)'](item.seller, amountUnits);
+        }
+        
+        payLoading.innerHTML = '<div class="loading"></div> Waiting for blockchain confirmation...';
+        const receipt = await tx.wait();
+        
+        let transferMsg = '';
+        if (item.type === 'nft') {
+          transferMsg = `<br><br><span style='color:#28a745;font-weight:600;'>🎉 NFT Purchased!</span><br><span style='font-size:0.9rem;'>Your ${item.title} will be transferred shortly.</span>`;
+        } else if (item.type === 'crypto') {
+          transferMsg = `<br><br><span style='color:#28a745;font-weight:600;'>💰 Crypto Purchased!</span><br><span style='font-size:0.9rem;'>Your ${item.title} will be sent to your wallet.</span>`;
+        }
+        
+        payLoading.innerHTML = `
+          <div style='color:#28a745;font-weight:600;font-size:1.1rem;margin-bottom:8px;'>✅ Payment Confirmed!</div>
+          <div style='font-size:0.85rem;color:#666;margin-bottom:8px;'>Tx: <a href='https://explore.tempo.xyz/tx/${receipt.transactionHash}' target='_blank' style='color:#1e90ff;'>${receipt.transactionHash.slice(0,10)}...</a></div>
+          <div style='font-size:0.9rem;background:#f4f8fb;padding:8px;border-radius:6px;margin-top:8px;'>
+            📝 Memo: "${memoText}"
+          </div>
+          ${transferMsg}
+        `;
+        
+        // Move item to sold listings
+        soldItems.push(item);
+        items.splice(idx, 1);
+        renderItems();
+      } catch (err) {
+        console.error('Payment error:', err);
+        payLoading.innerHTML = `<div style='color:#d9534f;'>❌ Payment failed</div><div style='font-size:0.85rem;margin-top:8px;'>${err.message || err}</div>`;
+      }
+    }
+    renderItems();
+    
+    // Theme toggle functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeText(newTheme);
+    }
+    
+    function updateThemeText(theme) {
+      const text = document.getElementById('theme-text');
+      text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+    
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeText(savedTheme);
+    });
+  </script>
+  <footer style="text-align:center;padding:24px;color:#888;font-size:0.9em;background:var(--card-bg);">
+    © 2026 Tempo Developer Hub. Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a>. All rights reserved.
+  </footer>
+</body>
+</html>

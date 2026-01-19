@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempo Receipt Book - Professional Accounting Tool</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --tempo-blue: #1e90ff;
+      --tempo-cyan: #00e0d3;
+      --tempo-bg: #f7fafd;
+      --tempo-card: #fff;
+      --tempo-radius: 16px;
+      --tempo-shadow: 0 4px 32px rgba(30,144,255,0.12);
+      --text-primary: #222;
+      --text-secondary: #444;
+      --text-tertiary: #555;
+    }
+    
+    [data-theme="dark"] {
+      --tempo-bg: #0a0e1a;
+      --tempo-card: #151b2e;
+      --tempo-shadow: 0 4px 32px rgba(0,0,0,0.5);
+      --text-primary: #e8eaed;
+      --text-secondary: #c4c7cc;
+      --text-tertiary: #9aa0a6;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--tempo-bg);
+      color: var(--text-primary);
+      margin: 0;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .navbar {
+      position: sticky;
+      top: 0;
+      background: var(--tempo-card);
+      box-shadow: 0 2px 8px rgba(30,144,255,0.08);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 60px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .theme-toggle {
+      background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 2px 8px rgba(30,144,255,0.3);
+      white-space: nowrap;
+    }
+    
+    .theme-toggle:hover {
+      transform: scale(1.05);
+    }
+    
+    .navbar a {
+      color: var(--tempo-blue);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.08rem;
+      transition: color 0.2s;
+    }
+    
+    .navbar a:hover {
+      color: var(--tempo-cyan);
+    }
+    
+    .connect-btn {
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .connect-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30,144,255,0.3);
+    }
+    
+    .connected {
+      background: #e8f4fd;
+      color: var(--tempo-blue);
+    }
+    
+    .hero {
+      text-align: center;
+      padding: 56px 16px 32px 16px;
+    }
+    
+    .hero h1 {
+      color: var(--tempo-blue);
+      font-size: 2.8rem;
+      margin-bottom: 8px;
+    }
+    
+    .hero p {
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .stat-card {
+      background: var(--tempo-card);
+      border-radius: var(--tempo-radius);
+      padding: 24px;
+      box-shadow: var(--tempo-shadow);
+      border-left: 4px solid var(--tempo-blue);
+    }
+    
+    .stat-card.income {
+      border-left-color: #00c853;
+    }
+    
+    .stat-card.expense {
+      border-left-color: #ff5252;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--tempo-blue);
+    }
+    
+    .stat-value.income {
+      color: #00c853;
+    }
+    
+    .stat-value.expense {
+      color: #ff5252;
+    }
+    
+    .controls {
+      background: var(--tempo-card);
+      border-radius: var(--tempo-radius);
+      padding: 24px;
+      box-shadow: var(--tempo-shadow);
+      margin-bottom: 24px;
+    }
+    
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .control-group label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+      color: #555;
+    }
+    
+    .control-group input,
+    .control-group select {
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .control-group input:focus,
+    .control-group select:focus {
+      outline: none;
+      border-color: var(--tempo-blue);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .tempo-btn {
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tempo-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30,144,255,0.3);
+    }
+    
+    .tempo-btn.secondary {
+      background: #e8f4fd;
+      color: var(--tempo-blue);
+    }
+    
+    .transactions-section {
+      background: var(--tempo-card);
+      border-radius: var(--tempo-radius);
+      box-shadow: var(--tempo-shadow);
+      overflow: hidden;
+    }
+    
+    .section-header {
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      color: white;
+      padding: 20px 24px;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    thead {
+      background: #f4f8fb;
+    }
+    
+    th {
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #555;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    tr:hover {
+      background: #f9fbfd;
+    }
+    
+    .tx-hash {
+      font-family: monospace;
+      color: var(--tempo-blue);
+      font-size: 0.9rem;
+    }
+    
+    .tx-type {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .tx-type.sent {
+      background: #ffebee;
+      color: #c62828;
+    }
+    
+    .tx-type.received {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    
+    .amount {
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    
+    .amount.sent {
+      color: #c62828;
+    }
+    
+    .amount.received {
+      color: #2e7d32;
+    }
+    
+    .category-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      background: #e8f4fd;
+      color: var(--tempo-blue);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .category-badge:hover {
+      background: var(--tempo-blue);
+      color: white;
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--tempo-blue);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+      background: #e8f4fd;
+    }
+    
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: var(--tempo-shadow);
+    }
+    
+    .modal h3 {
+      color: var(--tempo-blue);
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+    
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .modal-form label {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #555;
+    }
+    
+    .modal-form input,
+    .modal-form select,
+    .modal-form textarea {
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .empty-state-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--tempo-blue);
+    }
+    
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--tempo-blue);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .export-info {
+      background: #e8f4fd;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      color: #555;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .navbar {
+        padding: 0 16px;
+        flex-direction: column;
+        height: auto;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+      
+      .navbar-left {
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      
+      .controls-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      table {
+        font-size: 0.9rem;
+      }
+      
+      th, td {
+        padding: 12px 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-left">
+      <a href="index.html" style="font-weight:700;">⚡ Tempo Hub</a>
+      <span style="color: var(--tempo-blue); font-weight: 700; font-size: 1.2rem;">Receipt Book</span>
+    </div>
+    <div class="navbar-right">
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="theme-text">Dark Mode</span>
+      </button>
+      <button id="connectBtn" class="connect-btn" onclick="connectWallet()">Connect Wallet</button>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <h1>Tempo Receipt Book</h1>
+    <p>Professional accounting tool for tracking and categorizing your Tempo transactions</p>
+  </div>
+
+  <div class="container">
+    <div id="walletConnected" style="display:none;">
+      <!-- Dashboard Stats -->
+      <div class="dashboard">
+        <div class="stat-card">
+          <div class="stat-label">Total Transactions</div>
+          <div class="stat-value" id="totalTxCount">0</div>
+        </div>
+        <div class="stat-card income">
+          <div class="stat-label">Total Received</div>
+          <div class="stat-value income" id="totalReceived">$0.00</div>
+        </div>
+        <div class="stat-card expense">
+          <div class="stat-label">Total Sent</div>
+          <div class="stat-value expense" id="totalSent">$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Net Balance</div>
+          <div class="stat-value" id="netBalance">$0.00</div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <div class="controls-grid">
+          <div class="control-group">
+            <label>Search</label>
+            <input type="text" id="searchInput" placeholder="Search by hash, address..." onkeyup="filterTransactions()">
+          </div>
+          <div class="control-group">
+            <label>Category</label>
+            <select id="categoryFilter" onchange="filterTransactions()">
+              <option value="">All Categories</option>
+              <option value="Business Income">💼 Business Income</option>
+              <option value="Personal Income">💰 Personal Income</option>
+              <option value="Business Expense">📊 Business Expense</option>
+              <option value="Personal Expense">💳 Personal Expense</option>
+              <option value="Transfer">🔄 Transfer (Non-Taxable)</option>
+              <option value="Investment">📈 Investment</option>
+              <option value="Salary/Wages">💵 Salary/Wages</option>
+              <option value="Payment Received">✅ Payment Received</option>
+              <option value="Payment Sent">📤 Payment Sent</option>
+              <option value="Refund">↩️ Refund</option>
+              <option value="Gift">🎁 Gift</option>
+              <option value="Donation">❤️ Donation</option>
+              <option value="Uncategorized">Uncategorized</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Type</label>
+            <select id="typeFilter" onchange="filterTransactions()">
+              <option value="">All Types</option>
+              <option value="received">Received</option>
+              <option value="sent">Sent</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Tax Year</label>
+            <select id="taxYearFilter" onchange="filterTransactions()">
+              <option value="">All Years</option>
+              <option value="2026">Tax Year 2026</option>
+              <option value="2025">Tax Year 2025</option>
+              <option value="2024">Tax Year 2024</option>
+              <option value="2023">Tax Year 2023</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Quarter</label>
+            <select id="quarterFilter" onchange="filterTransactions()">
+              <option value="">All Quarters</option>
+              <option value="Q1">Q1 (Jan-Mar)</option>
+              <option value="Q2">Q2 (Apr-Jun)</option>
+              <option value="Q3">Q3 (Jul-Sep)</option>
+              <option value="Q4">Q4 (Oct-Dec)</option>
+            </select>
+          </div>
+          <div class="control-group">
+            <label>Date Range</label>
+            <select id="dateFilter" onchange="filterTransactions()">
+              <option value="">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+            </select>
+          </div>
+        </div>
+        <div class="button-group">
+          <button class="tempo-btn" onclick="refreshTransactions()">🔄 Refresh</button>
+          <button class="tempo-btn secondary" onclick="exportToCSV()">📥 Export CSV</button>
+          <button class="tempo-btn secondary" onclick="exportToPDF()">📄 Export PDF</button>
+          <button class="tempo-btn" onclick="exportTaxSummary()" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);">📊 Tax Summary</button>
+          <button class="tempo-btn secondary" onclick="clearCategories()">🗑️ Clear Categories</button>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="transactions-section">
+        <div class="section-header">
+          <span id="transactionCount">0 Transactions</span>
+        </div>
+        <div id="loadingState" class="loading" style="display:none;">
+          <div class="spinner"></div>
+          <div id="loadingMessage">Loading transactions from blockchain...</div>
+          <div id="loadingProgress" style="font-size:0.9rem;color:#666;margin-top:8px;"></div>
+        </div>
+        <div id="emptyState" class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <h3>No Transactions Found</h3>
+          <p>Connect your wallet and make some transactions to see them here.</p>
+        </div>
+        <div class="table-container" id="tableContainer" style="display:none;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>From/To</th>
+                <th>Amount</th>
+                <th>Memo</th>
+                <th>Category</th>
+                <th>Notes</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet Not Connected State -->
+    <div id="walletNotConnected" class="empty-state" style="padding: 80px 20px;">
+      <div class="empty-state-icon">🔌</div>
+      <h2 style="color: var(--tempo-blue); margin-bottom: 16px;">Connect Your Wallet</h2>
+      <p style="font-size: 1.1rem; margin-bottom: 24px;">Connect your Tempo wallet to view and manage your transaction receipts</p>
+      <button class="tempo-btn" onclick="connectWallet()" style="font-size: 1.1rem; padding: 14px 32px;">Connect Wallet</button>
+    </div>
+  </div>
+
+  <!-- Categorize Modal -->
+  <div id="categorizeModal" class="modal-bg">
+    <div class="modal">
+      <h3>Categorize Transaction</h3>
+      <div class="modal-form">
+        <div>
+          <label>Category</label>
+          <select id="modalCategory">
+            <option value="Business Income">💼 Business Income</option>
+            <option value="Personal Income">💰 Personal Income</option>
+            <option value="Business Expense">📊 Business Expense</option>
+            <option value="Personal Expense">💳 Personal Expense</option>
+            <option value="Transfer">🔄 Transfer (Non-Taxable)</option>
+            <option value="Investment">📈 Investment</option>
+            <option value="Salary/Wages">💵 Salary/Wages</option>
+            <option value="Payment Received">✅ Payment Received</option>
+            <option value="Payment Sent">📤 Payment Sent</option>
+            <option value="Refund">↩️ Refund</option>
+            <option value="Gift">🎁 Gift</option>
+            <option value="Donation">❤️ Donation</option>
+            <option value="Uncategorized">Uncategorized</option>
+          </select>
+        </div>
+        <div>
+          <label>Notes</label>
+          <textarea id="modalNotes" rows="3" placeholder="Add notes about this transaction..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="tempo-btn" onclick="saveCategory()">Save</button>
+        <button class="tempo-btn secondary" onclick="closeCategorizeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer style="text-align:center;color:#888;padding:32px 0 16px 0;font-size:0.98em;">
+    <div>Built for Tempo testnet accounting and tax purposes</div>
+    <div style="margin-top:8px;">
+      <a href="https://docs.tempo.xyz/" target="_blank" style="color:#1e90ff;text-decoration:none;font-weight:600;">Tempo Docs</a>
+    </div>
+    <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e0e0e0;">
+      <div style="font-size:0.9em;color:#666;margin-bottom:8px;">💝 Support this project:</div>
+      <div style="display:inline-flex;align-items:center;background:#f4f8fb;padding:8px 12px;border-radius:8px;font-family:monospace;font-size:0.9em;color:#222;">
+        <span>0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f</span>
+        <button onclick="copyDonationAddress()" style="margin-left:8px;background:var(--tempo-blue);color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:0.85em;">Copy</button>
+      </div>
+      <div id="copy-feedback" style="color:var(--tempo-cyan);font-size:0.85em;margin-top:8px;visibility:hidden;">✓ Address copied!</div>
+    </div>
+  </footer>
+
+  <script>
+    let userAddress = null;
+    let allTransactions = [];
+    let currentTxHash = null;
+    const TEMPO_RPC = 'https://rpc.moderato.tempo.xyz';
+    const ALPHAUSD_ADDRESS = '0x20C0000000000000000000000000000000000001';
+
+    // Load saved data from localStorage
+    function loadSavedData() {
+      const saved = localStorage.getItem('tempoReceiptData');
+      return saved ? JSON.parse(saved) : {};
+    }
+
+    function saveData(data) {
+      localStorage.setItem('tempoReceiptData', JSON.stringify(data));
+    }
+
+    function copyDonationAddress() {
+      navigator.clipboard.writeText('0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f');
+      document.getElementById('copy-feedback').style.visibility = 'visible';
+      setTimeout(() => { document.getElementById('copy-feedback').style.visibility = 'hidden'; }, 2000);
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert('MetaMask not found. Please install MetaMask to use this tool.');
+        return;
+      }
+
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const accounts = await provider.send('eth_requestAccounts', []);
+        userAddress = accounts[0];
+
+        // Update UI
+        document.getElementById('connectBtn').innerText = userAddress.slice(0, 6) + '...' + userAddress.slice(-4);
+        document.getElementById('connectBtn').classList.add('connected');
+        document.getElementById('walletNotConnected').style.display = 'none';
+        document.getElementById('walletConnected').style.display = 'block';
+
+        // Check network
+        const network = await provider.getNetwork();
+        if (network.chainId !== 42431) {
+          const switchConfirm = confirm('Please switch to Tempo Testnet (Chain ID: 42431)');
+          if (switchConfirm) {
+            try {
+              await window.ethereum.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: '0xA5BF' }]
+              });
+            } catch (switchError) {
+              if (switchError.code === 4902) {
+                await window.ethereum.request({
+                  method: 'wallet_addEthereumChain',
+                  params: [{
+                    chainId: '0xA5BF',
+                    chainName: 'Tempo Testnet (Moderato)',
+                    nativeCurrency: { name: 'USD', symbol: 'USD', decimals: 18 },
+                    rpcUrls: ['https://rpc.moderato.tempo.xyz'],
+                    blockExplorerUrls: ['https://explore.tempo.xyz']
+                  }]
+                });
+              }
+            }
+          }
+        }
+
+        await loadTransactions();
+      } catch (error) {
+        console.error('Error connecting wallet:', error);
+        alert('Failed to connect wallet: ' + error.message);
+      }
+    }
+
+    async function loadTransactions() {
+      document.getElementById('loadingState').style.display = 'block';
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('tableContainer').style.display = 'none';
+
+      try {
+        const transactions = [];
+        const savedData = loadSavedData();
+        const provider = new ethers.providers.JsonRpcProvider(TEMPO_RPC);
+
+        console.log('📊 Fetching comprehensive transaction data from Tempo blockchain for', userAddress);
+        console.log('⚡ Using same data source as Tempo Explorer (explore.tempo.xyz)');
+
+        // 1. Fetch TIP-20 token transfers (Primary transaction type on Tempo)
+        const tokens = [
+          { address: '0x20C0000000000000000000000000000000000001', name: 'alphaUSD', decimals: 6 },
+          { address: '0x20C0000000000000000000000000000000000002', name: 'betaUSD', decimals: 6 },
+          { address: '0x20C0000000000000000000000000000000000003', name: 'thetaUSD', decimals: 6 },
+          { address: '0x20C0000000000000000000000000000000000004', name: 'pathUSD', decimals: 6 }
+        ];
+
+        console.log('🔍 Fetching TIP-20 token transfers from all tokens...');
+        document.getElementById('loadingMessage').textContent = 'Scanning TIP-20 token transfers...';
+
+        // Get latest block for chunked queries
+        const latestBlock = await provider.getBlockNumber();
+        const MAX_BLOCK_RANGE = 100000; // RPC limit
+        const RATE_LIMIT_DELAY = 200; // ms between requests
+
+        // Helper function to add delay
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+        for (const token of tokens) {
+          try {
+            document.getElementById('loadingProgress').textContent = `Scanning ${token.name}...`;
+            
+            // Transfer event signature: Transfer(address indexed from, address indexed to, uint256 value)
+            const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+            
+            let allSentLogs = [];
+            let allReceivedLogs = [];
+
+            // Query in chunks to avoid "max block range" error
+            for (let toBlock = latestBlock; toBlock >= 0; toBlock -= MAX_BLOCK_RANGE) {
+              const fromBlock = Math.max(0, toBlock - MAX_BLOCK_RANGE + 1);
+              
+              try {
+                // Get transfers where user is sender (topic[1] = from address)
+                await delay(RATE_LIMIT_DELAY);
+                const sentLogs = await provider.getLogs({
+                  fromBlock: fromBlock,
+                  toBlock: toBlock,
+                  address: token.address,
+                  topics: [
+                    transferTopic,
+                    ethers.utils.hexZeroPad(userAddress.toLowerCase(), 32)
+                  ]
+                });
+                allSentLogs = allSentLogs.concat(sentLogs);
+
+                // Get transfers where user is receiver (topic[2] = to address)
+                await delay(RATE_LIMIT_DELAY);
+                const receivedLogs = await provider.getLogs({
+                  fromBlock: fromBlock,
+                  toBlock: toBlock,
+                  address: token.address,
+                  topics: [
+                    transferTopic,
+                    null,
+                    ethers.utils.hexZeroPad(userAddress.toLowerCase(), 32)
+                  ]
+                });
+                allReceivedLogs = allReceivedLogs.concat(receivedLogs);
+
+                // If we found logs, we can break early (most recent transactions found)
+                if (allSentLogs.length > 0 || allReceivedLogs.length > 0) {
+                  // Keep searching a bit more history, but limit total search
+                  if (toBlock - fromBlock < MAX_BLOCK_RANGE * 3) {
+                    break;
+                  }
+                }
+              } catch (chunkErr) {
+                console.log(`⚠️ Error fetching ${token.name} chunk ${fromBlock}-${toBlock}:`, chunkErr.message);
+              }
+            }
+
+            const sentLogs = allSentLogs;
+            const receivedLogs = allReceivedLogs;
+
+            // Process sent transactions
+            for (const log of sentLogs) {
+              try {
+                await delay(RATE_LIMIT_DELAY / 2);
+                const block = await provider.getBlock(log.blockNumber);
+                const amount = ethers.BigNumber.from(log.data);
+                const to = '0x' + log.topics[2].slice(26);
+                
+                // Try to get transaction memo from Tempo transaction
+                let txMemo = '';
+                try {
+                  const tx = await provider.getTransaction(log.transactionHash);
+                  if (tx && tx.memo) {
+                    txMemo = ethers.utils.toUtf8String(tx.memo);
+                  }
+                } catch (memoErr) {
+                  // Memo field might not exist or be readable
+                }
+
+                transactions.push({
+                  hash: log.transactionHash,
+                  from: userAddress,
+                  to: to,
+                  value: ethers.utils.formatUnits(amount, token.decimals),
+                  token: token.name,
+                  timestamp: block.timestamp * 1000,
+                  blockNumber: log.blockNumber,
+                  gasUsed: '0',
+                  feeToken: token.address,
+                  memo: txMemo || savedData[log.transactionHash]?.memo || '',
+                  type: 'sent',
+                  category: savedData[log.transactionHash]?.category || 'Uncategorized',
+                  notes: savedData[log.transactionHash]?.notes || ''
+                });
+              } catch (err) {
+                console.log('⚠️ Error processing sent log:', err.message);
+              }
+            }
+
+            // Process received transactions
+            for (const log of receivedLogs) {
+              try {
+                // Skip if we already have this transaction (from sent logs)
+                if (transactions.find(t => t.hash === log.transactionHash)) continue;
+
+                await delay(RATE_LIMIT_DELAY / 2);
+                const block = await provider.getBlock(log.blockNumber);
+                const amount = ethers.BigNumber.from(log.data);
+                const from = '0x' + log.topics[1].slice(26);
+                
+                // Try to get transaction memo from Tempo transaction
+                let txMemo = '';
+                try {
+                  const tx = await provider.getTransaction(log.transactionHash);
+                  if (tx && tx.memo) {
+                    txMemo = ethers.utils.toUtf8String(tx.memo);
+                  }
+                } catch (memoErr) {
+                  // Memo field might not exist or be readable
+                }
+
+                transactions.push({
+                  hash: log.transactionHash,
+                  from: from,
+                  to: userAddress,
+                  value: ethers.utils.formatUnits(amount, token.decimals),
+                  token: token.name,
+                  timestamp: block.timestamp * 1000,
+                  blockNumber: log.blockNumber,
+                  gasUsed: '0',
+                  feeToken: token.address,
+                  memo: txMemo || savedData[log.transactionHash]?.memo || '',
+                  type: 'received',
+                  category: savedData[log.transactionHash]?.category || 'Uncategorized',
+                  notes: savedData[log.transactionHash]?.notes || ''
+                });
+              } catch (err) {
+                console.log('⚠️ Error processing received log:', err.message);
+              }
+            }
+
+            console.log(`✅ ${token.name}: ${sentLogs.length} sent, ${receivedLogs.length} received`);
+            
+            // Update display with transactions found so far
+            const uniqueHashes = new Set();
+            const uniqueTransactions = transactions.filter(tx => {
+              if (uniqueHashes.has(tx.hash)) return false;
+              uniqueHashes.add(tx.hash);
+              return true;
+            });
+            allTransactions = uniqueTransactions.sort((a, b) => b.timestamp - a.timestamp);
+            
+            if (allTransactions.length > 0) {
+              document.getElementById('tableContainer').style.display = 'block';
+              displayTransactions(allTransactions);
+              updateStats(allTransactions);
+            }
+            
+            document.getElementById('loadingProgress').textContent = `Found ${allTransactions.length} transactions so far...`;
+          } catch (tokenError) {
+            console.log(`❌ Error fetching ${token.name} transfers:`, tokenError);
+          }
+        }
+
+        // 2. Fetch native Tempo transactions (EIP-2718) - Skip for now (very rare, slow to scan)
+        // Most Tempo transactions use TIP-20 tokens, not native transfers
+        console.log('✅ TIP-20 scan complete. Skipping native TEMPO scan (rarely used).');
+        document.getElementById('loadingMessage').textContent = 'Finalizing transaction list...';
+        document.getElementById('loadingProgress').textContent = '';
+
+        // Remove duplicates and sort by timestamp
+        const uniqueHashes = new Set();
+        const uniqueTransactions = transactions.filter(tx => {
+          if (uniqueHashes.has(tx.hash)) return false;
+          uniqueHashes.add(tx.hash);
+          return true;
+        });
+
+        allTransactions = uniqueTransactions.sort((a, b) => b.timestamp - a.timestamp);
+        
+        console.log(`✅ Total unique transactions: ${allTransactions.length}`);
+        console.log(`📍 Data sourced from: ${TEMPO_RPC}`);
+        console.log(`🔗 Verify on Explorer: https://explore.tempo.xyz/address/${userAddress}`);
+
+        displayTransactions(allTransactions);
+        updateStats(allTransactions);
+
+        document.getElementById('loadingState').style.display = 'none';
+        if (allTransactions.length === 0) {
+          document.getElementById('emptyState').innerHTML = `
+            <div class="empty-state-icon">📭</div>
+            <h3>No Transactions Found</h3>
+            <p>No transactions found for this address on Tempo blockchain.</p>
+            <p style="font-size:0.9rem;margin-top:12px;color:#666;">
+              Data sourced from Tempo RPC (same as Explorer)<br>
+              <a href="https://explore.tempo.xyz/address/${userAddress}?live=false" target="_blank" style="color:var(--tempo-blue);">🔍 View on Tempo Explorer</a>
+            </p>
+          `;
+          document.getElementById('emptyState').style.display = 'block';
+        } else {
+          document.getElementById('tableContainer').style.display = 'block';
+        }
+      } catch (error) {
+        console.error('❌ Error loading transactions:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('emptyState').innerHTML = `
+          <div class="empty-state-icon">⚠️</div>
+          <h3>Error Loading Transactions</h3>
+          <p>${error.message}</p>
+          <p style="font-size:0.9rem;margin-top:12px;color:#666;">
+            Data source: Tempo RPC (${TEMPO_RPC})<br>
+            <a href="https://explore.tempo.xyz/address/${userAddress}?live=false" target="_blank" style="color:var(--tempo-blue);">🔍 View directly on Tempo Explorer</a>
+          </p>
+        `;
+        document.getElementById('emptyState').style.display = 'block';
+      }
+    }
+
+    function displayTransactions(transactions) {
+      const tbody = document.getElementById('transactionsBody');
+      tbody.innerHTML = '';
+
+      transactions.forEach(tx => {
+        const row = document.createElement('tr');
+        const date = new Date(tx.timestamp).toLocaleString();
+        const address = tx.type === 'sent' ? tx.to : tx.from;
+        const shortAddress = address ? address.slice(0, 6) + '...' + address.slice(-4) : 'N/A';
+        const tokenDisplay = tx.token ? ` ${tx.token}` : '';
+
+        row.innerHTML = `
+          <td style="font-size:0.9rem;">${date}</td>
+          <td><span class="tx-type ${tx.type}">${tx.type.toUpperCase()}</span></td>
+          <td>
+            <div class="tx-hash" title="${address}">${shortAddress}</div>
+          </td>
+          <td><span class="amount ${tx.type}">${tx.type === 'sent' ? '-' : '+'}$${parseFloat(tx.value).toFixed(2)}${tokenDisplay}</span></td>
+          <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;font-style:italic;color:#666;font-size:0.9rem;" title="${tx.memo || 'No memo'}">${tx.memo || '-'}</td>
+          <td>
+            <span class="category-badge" onclick="openCategorizeModal('${tx.hash}')">${tx.category}</span>
+          </td>
+          <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;" title="${tx.notes}">${tx.notes || '-'}</td>
+          <td>
+            <button class="action-btn" onclick="openCategorizeModal('${tx.hash}')">✏️ Edit</button>
+            <a href="https://explore.tempo.xyz/tx/${tx.hash}" target="_blank" class="action-btn" title="View on Explorer">🔍</a>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      document.getElementById('transactionCount').innerText = `${transactions.length} Transaction${transactions.length !== 1 ? 's' : ''}`;
+    }
+
+    function updateStats(transactions) {
+      const totalReceived = transactions
+        .filter(tx => tx.type === 'received')
+        .reduce((sum, tx) => sum + parseFloat(tx.value), 0);
+
+      const totalSent = transactions
+        .filter(tx => tx.type === 'sent')
+        .reduce((sum, tx) => sum + parseFloat(tx.value), 0);
+
+      document.getElementById('totalTxCount').innerText = transactions.length;
+      document.getElementById('totalReceived').innerText = '$' + totalReceived.toFixed(2);
+      document.getElementById('totalSent').innerText = '$' + totalSent.toFixed(2);
+      document.getElementById('netBalance').innerText = '$' + (totalReceived - totalSent).toFixed(2);
+    }
+
+    function filterTransactions() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const categoryFilter = document.getElementById('categoryFilter').value;
+      const typeFilter = document.getElementById('typeFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+      const taxYearFilter = document.getElementById('taxYearFilter').value;
+      const quarterFilter = document.getElementById('quarterFilter').value;
+
+      let filtered = allTransactions.filter(tx => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+          tx.hash.toLowerCase().includes(searchTerm) ||
+          tx.from.toLowerCase().includes(searchTerm) ||
+          (tx.to && tx.to.toLowerCase().includes(searchTerm)) ||
+          (tx.memo && tx.memo.toLowerCase().includes(searchTerm)) ||
+          tx.notes.toLowerCase().includes(searchTerm);
+
+        // Category filter
+        const matchesCategory = !categoryFilter || tx.category === categoryFilter;
+
+        // Type filter
+        const matchesType = !typeFilter || tx.type === typeFilter;
+        
+        // Tax year filter
+        const txDate = new Date(tx.timestamp);
+        const txYear = txDate.getFullYear();
+        const matchesTaxYear = !taxYearFilter || txYear === parseInt(taxYearFilter);
+        
+        // Quarter filter
+        const txMonth = txDate.getMonth() + 1; // 1-12
+        let matchesQuarter = true;
+        if (quarterFilter) {
+          if (quarterFilter === 'Q1') matchesQuarter = txMonth >= 1 && txMonth <= 3;
+          else if (quarterFilter === 'Q2') matchesQuarter = txMonth >= 4 && txMonth <= 6;
+          else if (quarterFilter === 'Q3') matchesQuarter = txMonth >= 7 && txMonth <= 9;
+          else if (quarterFilter === 'Q4') matchesQuarter = txMonth >= 10 && txMonth <= 12;
+        }
+
+        // Date filter
+        let matchesDate = true;
+        if (dateFilter) {
+          const now = Date.now();
+          const txTimestamp = tx.timestamp;
+          switch(dateFilter) {
+            case 'today':
+              matchesDate = new Date(txTimestamp).toDateString() === new Date(now).toDateString();
+              break;
+            case 'week':
+              matchesDate = (now - txTimestamp) < 7 * 24 * 60 * 60 * 1000;
+              break;
+            case 'month':
+              matchesDate = (now - txTimestamp) < 30 * 24 * 60 * 60 * 1000;
+              break;
+            case 'year':
+              matchesDate = (now - txTimestamp) < 365 * 24 * 60 * 60 * 1000;
+              break;
+          }
+        }
+
+        return matchesSearch && matchesCategory && matchesType && matchesDate && matchesTaxYear && matchesQuarter;
+      });
+
+      displayTransactions(filtered);
+      updateStats(filtered);
+    }
+
+    function openCategorizeModal(txHash) {
+      currentTxHash = txHash;
+      const tx = allTransactions.find(t => t.hash === txHash);
+      if (tx) {
+        document.getElementById('modalCategory').value = tx.category === 'Uncategorized' ? 'Income' : tx.category;
+        document.getElementById('modalNotes').value = tx.notes;
+      }
+      document.getElementById('categorizeModal').style.display = 'flex';
+    }
+
+    function closeCategorizeModal() {
+      document.getElementById('categorizeModal').style.display = 'none';
+      currentTxHash = null;
+    }
+
+    function saveCategory() {
+      if (!currentTxHash) return;
+
+      const category = document.getElementById('modalCategory').value;
+      const notes = document.getElementById('modalNotes').value;
+
+      // Update transaction
+      const tx = allTransactions.find(t => t.hash === currentTxHash);
+      if (tx) {
+        tx.category = category;
+        tx.notes = notes;
+
+        // Save to localStorage
+        const savedData = loadSavedData();
+        savedData[currentTxHash] = { category, notes };
+        saveData(savedData);
+
+        // Refresh display
+        filterTransactions();
+      }
+
+      closeCategorizeModal();
+    }
+
+    function refreshTransactions() {
+      loadTransactions();
+    }
+
+    function clearCategories() {
+      if (confirm('Are you sure you want to clear all categories and notes?')) {
+        localStorage.removeItem('tempoReceiptData');
+        allTransactions.forEach(tx => {
+          tx.category = 'Uncategorized';
+          tx.notes = '';
+        });
+        displayTransactions(allTransactions);
+      }
+    }
+
+    function exportToCSV() {
+      if (allTransactions.length === 0) {
+        alert('No transactions to export');
+        return;
+      }
+
+      const filtered = getCurrentFilteredTransactions();
+      let csv = 'Date,Type,From,To,Amount (USD),Category,Notes,Transaction Hash\n';
+      
+      filtered.forEach(tx => {
+        const date = new Date(tx.timestamp).toLocaleString();
+        csv += `"${date}","${tx.type}","${tx.from}","${tx.to || 'N/A'}","${tx.value}","${tx.category}","${tx.notes}","${tx.hash}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tempo-receipts-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    function exportToPDF() {
+      alert('PDF export feature coming soon! For now, please use "Print" in your browser (Ctrl+P or Cmd+P) to save as PDF.');
+      window.print();
+    }
+
+    function exportTaxSummary() {
+      if (allTransactions.length === 0) {
+        alert('No transactions to generate tax summary');
+        return;
+      }
+
+      // Get tax year from filter or current year
+      const taxYearFilter = document.getElementById('taxYearFilter').value;
+      const taxYear = taxYearFilter || new Date().getFullYear();
+
+      // Filter transactions by tax year
+      const yearTransactions = allTransactions.filter(tx => {
+        const txYear = new Date(tx.timestamp).getFullYear();
+        return taxYearFilter ? txYear === parseInt(taxYear) : true;
+      });
+
+      // Calculate totals by category
+      const categoryTotals = {};
+      const businessIncome = [];
+      const businessExpenses = [];
+      const personalIncome = [];
+      const personalExpenses = [];
+
+      yearTransactions.forEach(tx => {
+        const amount = parseFloat(tx.value);
+        const category = tx.category;
+
+        if (!categoryTotals[category]) {
+          categoryTotals[category] = { sent: 0, received: 0, count: 0 };
+        }
+
+        if (tx.type === 'received') {
+          categoryTotals[category].received += amount;
+        } else {
+          categoryTotals[category].sent += amount;
+        }
+        categoryTotals[category].count++;
+
+        // Sort into tax categories
+        if (category === 'Business Income') businessIncome.push(tx);
+        else if (category === 'Business Expense') businessExpenses.push(tx);
+        else if (category === 'Personal Income' || category === 'Salary/Wages') personalIncome.push(tx);
+        else if (category === 'Personal Expense') personalExpenses.push(tx);
+      });
+
+      // Calculate totals
+      const totalBusinessIncome = businessIncome.reduce((sum, tx) => sum + parseFloat(tx.value), 0);
+      const totalBusinessExpenses = businessExpenses.reduce((sum, tx) => sum + parseFloat(tx.value), 0);
+      const netBusinessProfit = totalBusinessIncome - totalBusinessExpenses;
+      const totalPersonalIncome = personalIncome.reduce((sum, tx) => sum + parseFloat(tx.value), 0);
+      const totalPersonalExpenses = personalExpenses.reduce((sum, tx) => sum + parseFloat(tx.value), 0);
+
+      // Generate CSV format
+      let csv = `Tempo Transaction Tax Summary\\nTax Year: ${taxYear}\\nGenerated: ${new Date().toLocaleString()}\\n`;
+      csv += `Wallet Address: ${userAddress}\\n\\n`;
+      
+      csv += `BUSINESS SUMMARY\\n`;
+      csv += `Total Business Income:,$${totalBusinessIncome.toFixed(2)},${businessIncome.length} transactions\\n`;
+      csv += `Total Business Expenses:,$${totalBusinessExpenses.toFixed(2)},${businessExpenses.length} transactions\\n`;
+      csv += `Net Business Profit/Loss:,$${netBusinessProfit.toFixed(2)}\\n\\n`;
+      
+      csv += `PERSONAL SUMMARY\\n`;
+      csv += `Total Personal Income:,$${totalPersonalIncome.toFixed(2)},${personalIncome.length} transactions\\n`;
+      csv += `Total Personal Expenses:,$${totalPersonalExpenses.toFixed(2)},${personalExpenses.length} transactions\\n\\n`;
+      
+      csv += `CATEGORY BREAKDOWN\\n`;
+      csv += `Category,Total Received,Total Sent,Transaction Count\\n`;
+      
+      Object.entries(categoryTotals)
+        .sort((a, b) => (b[1].received + b[1].sent) - (a[1].received + a[1].sent))
+        .forEach(([category, data]) => {
+          csv += `${category},$${data.received.toFixed(2)},$${data.sent.toFixed(2)},${data.count}\\n`;
+        });
+
+      csv += `\\n\\nDETAILED BUSINESS INCOME\\n`;
+      csv += `Date,From,Amount,Token,Memo,Notes\\n`;
+      businessIncome.forEach(tx => {
+        const date = new Date(tx.timestamp).toLocaleDateString();
+        csv += `${date},${tx.from},$${tx.value},${tx.token},"${tx.memo || ''}","${tx.notes || ''}"\\n`;
+      });
+
+      csv += `\\n\\nDETAILED BUSINESS EXPENSES\\n`;
+      csv += `Date,To,Amount,Token,Memo,Notes\\n`;
+      businessExpenses.forEach(tx => {
+        const date = new Date(tx.timestamp).toLocaleDateString();
+        csv += `${date},${tx.to},$${tx.value},${tx.token},"${tx.memo || ''}","${tx.notes || ''}"\\n`;
+      });
+
+      csv += `\\n\\nNOTE: This is a summary for tax purposes. Consult with a tax professional for proper filing.\\n`;
+      csv += `Stablecoins are typically treated as property by the IRS. Transactions may be subject to capital gains tax.\\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tempo-tax-summary-${taxYear}.csv`;
+      a.click();
+      
+      alert(`Tax summary for ${taxYear} exported!\\n\\nBusiness Income: $${totalBusinessIncome.toFixed(2)}\\nBusiness Expenses: $${totalBusinessExpenses.toFixed(2)}\\nNet Business: $${netBusinessProfit.toFixed(2)}\\n\\nRemember to consult with a tax professional.`);
+    }
+
+    function getCurrentFilteredTransactions() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const categoryFilter = document.getElementById('categoryFilter').value;
+      const typeFilter = document.getElementById('typeFilter').value;
+      const dateFilter = document.getElementById('dateFilter').value;
+
+      return allTransactions.filter(tx => {
+        const matchesSearch = !searchTerm || 
+          tx.hash.toLowerCase().includes(searchTerm) ||
+          tx.from.toLowerCase().includes(searchTerm) ||
+          (tx.to && tx.to.toLowerCase().includes(searchTerm)) ||
+          tx.notes.toLowerCase().includes(searchTerm);
+        const matchesCategory = !categoryFilter || tx.category === categoryFilter;
+        const matchesType = !typeFilter || tx.type === typeFilter;
+        
+        let matchesDate = true;
+        if (dateFilter) {
+          const now = Date.now();
+          const txDate = tx.timestamp;
+          switch(dateFilter) {
+            case 'today':
+              matchesDate = new Date(txDate).toDateString() === new Date(now).toDateString();
+              break;
+            case 'week':
+              matchesDate = (now - txDate) < 7 * 24 * 60 * 60 * 1000;
+              break;
+            case 'month':
+              matchesDate = (now - txDate) < 30 * 24 * 60 * 60 * 1000;
+              break;
+            case 'year':
+              matchesDate = (now - txDate) < 365 * 24 * 60 * 60 * 1000;
+              break;
+          }
+        }
+        
+        return matchesSearch && matchesCategory && matchesType && matchesDate;
+      });
+    }
+
+    // Close modal on background click
+    document.getElementById('categorizeModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeCategorizeModal();
+      }
+    });
+    
+    // Theme toggle functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeText(newTheme);
+    }
+    
+    function updateThemeText(theme) {
+      const text = document.getElementById('theme-text');
+      text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+    
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeText(savedTheme);
+    });
+  </script>
+  <footer style="text-align:center;padding:24px;color:#888;font-size:0.9em;background:var(--card-bg);">
+    © 2026 Tempo Developer Hub. Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a>. All rights reserved.
+  </footer>
+</body>
+</html>
