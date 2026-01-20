@@ -33,10 +33,17 @@
       --text-tertiary: #9aa0a6;
       --demo-box-bg: #1a2235;
     }
-    body { font-family: 'Inter', sans-serif; background: var(--tempo-bg); color: var(--text-primary); margin: 0; transition: background-color 0.3s ease, color 0.3s ease; }
-    .navbar { position: sticky; top: 0; background: var(--tempo-card); box-shadow: 0 2px 8px rgba(30,144,255,0.08); z-index: 10; display: flex; align-items: center; padding: 0 32px; height: 60px; transition: background-color 0.3s ease; }
-    .navbar a { color: var(--tempo-blue); text-decoration: none; font-weight: 600; margin-right: 32px; font-size: 1.08rem; transition: color 0.2s; }
-    .navbar a:hover { color: var(--tempo-cyan); }
+    body { font-family: 'Inter', sans-serif; background: var(--tempo-bg); color: var(--text-primary); margin: 0; transition: background-color 0.3s ease, color 0.3s ease; overflow-x: hidden; }
+    .navbar { position: sticky; top: 0; background: var(--tempo-card); box-shadow: 0 2px 8px rgba(30,144,255,0.08); z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 60px; transition: background-color 0.3s ease; }
+    .navbar > a { color: var(--tempo-blue); text-decoration: none; font-weight: 700; font-size: 1.08rem; }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a { color: var(--tempo-blue); text-decoration: none; font-weight: 600; font-size: 1.08rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--tempo-cyan); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+    .hamburger span { width: 25px; height: 3px; background: var(--tempo-blue); border-radius: 2px; transition: all 0.3s ease; }
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(8px, 8px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(7px, -7px); }
     .theme-toggle { background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: white; box-shadow: 0 2px 8px rgba(30,144,255,0.3); margin-left: auto; white-space: nowrap; }
     .theme-toggle:hover { transform: scale(1.05); }
     .hero { text-align: center; padding: 56px 16px 32px 16px; }
@@ -52,30 +59,161 @@
     .modal { background: var(--tempo-card); border-radius: 16px; padding: 32px; min-width: 320px; box-shadow: var(--tempo-shadow); text-align: center; transition: background-color 0.3s ease; }
     .modal img { margin: 16px 0; }
     .close-btn { background: none; color: var(--tempo-blue); border: none; font-weight: 600; cursor: pointer; margin-top: 16px; }
-    pre { background: var(--demo-box-bg); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.98em; transition: background-color 0.3s ease; }
+    pre { background: var(--demo-box-bg); padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 0.98em; transition: background-color 0.3s ease; max-width: 100%; }
     .setup-guide { margin-top: 24px; }
     .setup-guide h4 { margin-bottom: 8px; color: var(--tempo-blue); }
     .code-tabs { display: flex; gap: 8px; margin-bottom: 8px; }
     .code-tabs button { background: #eaf4fb; border: none; border-radius: 6px 6px 0 0; padding: 6px 16px; font-weight: 600; color: #1e90ff; cursor: pointer; }
     .code-tabs button.active { background: #fff; color: #00e0d3; }
-    @media (max-width: 700px) {
-      .section { padding: 24px 6px; }
-      .navbar { padding: 0 8px; }
+    @media (max-width: 968px) {
+      .navbar {
+        padding: 12px 16px;
+      }
+      
+      .hamburger {
+        display: flex;
+      }
+      
+      .nav-links {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: var(--tempo-card);
+        flex-direction: column;
+        gap: 0;
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: max-height 0.3s ease;
+      }
+      
+      .nav-links.active {
+        max-height: 400px;
+        padding: 16px 0;
+      }
+      
+      .nav-links a {
+        padding: 12px 24px;
+        border-bottom: 1px solid rgba(30,144,255,0.1);
+        font-size: 0.95rem;
+        text-align: center;
+      }
+      
+      .theme-toggle {
+        margin: 12px 24px;
+        width: calc(100% - 48px);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .section {
+        padding: 24px 16px;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .hero p {
+        font-size: 1rem;
+      }
+      
+      .section h2 {
+        font-size: 1.5rem;
+      }
+      
+      .navbar a {
+        font-size: 0.9rem;
+        margin-right: 12px;
+      }
+      
+      .demo-box {
+        padding: 16px;
+      }
+      
+      pre {
+        font-size: 0.85em;
+        padding: 12px;
+      }
+      
+      .qr-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .navbar {
+        padding: 8px;
+      }
+      
+      .navbar a {
+        font-size: 0.8rem;
+        margin-right: 8px;
+      }
+      
+      .hero {
+        padding: 32px 12px 24px 12px;
+      }
+      
+      .hero h1 {
+        font-size: 1.5rem;
+      }
+      
+      .hero p {
+        font-size: 0.9rem;
+      }
+      
+      .section {
+        padding: 16px 12px;
+        margin: 24px auto;
+      }
+      
+      .tempo-btn {
+        padding: 10px 18px;
+        font-size: 0.9rem;
+      }
+      
+      .donation-box {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        font-size: 0.75em !important;
+        padding: 12px !important;
+      }
+      
+      .donation-box button {
+        margin-left: 0 !important;
+        margin-top: 8px;
+        width: 100%;
+      }
+      
+      #donation-address {
+        font-size: 0.85em;
+      }
     }
   </style>
 </head>
 <body>
   <nav class="navbar">
     <a href="index.html" style="font-weight:700;">⚡ Tempo Hub</a>
-    <a href="#shopify">Shopify</a>
-    <a href="#woocommerce">WooCommerce</a>
-    <a href="#custom">Custom HTML/JS</a>
-    <a href="#mobile">Mobile</a>
-    <a href="#pos">POS</a>
-    <a href="https://docs.tempo.xyz/" target="_blank">Tempo Docs ↗</a>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-      <span id="theme-text">Dark Mode</span>
+    <button class="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span>
+      <span></span>
+      <span></span>
     </button>
+    <div class="nav-links" id="navLinks">
+      <a href="#shopify">Shopify</a>
+      <a href="#woocommerce">WooCommerce</a>
+      <a href="#custom">Custom HTML/JS</a>
+      <a href="#mobile">Mobile</a>
+      <a href="#pos">POS</a>
+      <a href="https://docs.tempo.xyz/" target="_blank">Tempo Docs ↗</a>
+      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+        <span id="theme-text">Dark Mode</span>
+      </button>
+    </div>
   </nav>
   <div class="hero">
     <h1>Tempo Plug-and-Play Payment Kits</h1>
@@ -92,7 +230,7 @@
       The testnet allows you to test payments with fake money before going live. Perfect for developers and merchants to integrate and test Tempo payments risk-free.</p>
     </div>
     
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
+    <div class="qr-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px;">
       <div style="text-align:center;padding:20px;background:#f4f8fb;border-radius:12px;">
         <h4 style="margin-top:0;color:var(--tempo-blue);">Step 1: Add Tempo Testnet</h4>
         <div id="setup-qr-network"></div>
@@ -528,11 +666,11 @@ if __name__ == '__main__':
     <h2>📱 Mobile Integration Template</h2>
     <div class="desc">Integrate Tempo payments into your mobile app using the Tempo SDK, Wagmi, or WalletConnect. Use transfer/transferWithMemo for all payments.</div>
     <div class="demo-box">
-      <div style="margin-bottom:24px;">
+      <div style="margin-bottom:24px;text-align:center;">
         <div style="margin-bottom:12px;font-weight:600;">🌐 Pay with Tempo Testnet</div>
         <div id="mobile-qr-network"></div>
       
-      <div style="border-top:1px solid #e0e0e0;padding-top:24px;margin-bottom:24px;">
+      <div style="border-top:1px solid #e0e0e0;padding-top:24px;margin-bottom:24px;text-align:center;">
         <div style="margin-bottom:12px;font-weight:600;">Scan to Pay (Any Amount)</div>
         <div id="mobile-qr-container"></div>
         <script>
@@ -540,9 +678,9 @@ if __name__ == '__main__':
           const walletAddress = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
           document.getElementById('mobile-qr-container').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(walletAddress)}&size=200x200" style="margin-bottom:12px;">`;
         </script>
-        <div style="color:#888;font-size:0.98em;">Scan with a Tempo-compatible wallet to send payment to<br>0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f<br>(Enter amount in your wallet)</div>
+        <div style="color:#888;font-size:0.98em;padding:0 8px;">Scan with a Tempo-compatible wallet to send payment to<br><span style="word-break:break-all;overflow-wrap:break-word;display:inline-block;max-width:100%;font-family:monospace;font-size:0.9em;">0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f</span><br>(Enter amount in your wallet)</div>
       </div>
-      <div style="border-top:1px solid #e0e0e0;padding-top:24px;">
+      <div style="border-top:1px solid #e0e0e0;padding-top:24px;text-align:center;">
         <div style="margin-bottom:12px;font-weight:600;">Scan to Pay $10 (AlphaUSD) MetaMask </div>
         <div id="mobile-qr-10"></div>
         <script>
@@ -555,7 +693,7 @@ if __name__ == '__main__':
           const paymentUri = `ethereum:${tokenAddress}@${chainId}/transfer?address=${recipientAddress}&uint256=${amount}`;
           document.getElementById('mobile-qr-10').innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(paymentUri)}&size=200x200" style="margin-bottom:12px;">`;
         </script>
-        <div style="color:#888;font-size:0.98em;">Scan to send $10 in AlphaUSD (TIP-20) - everything pre-filled, just confirm!</div>
+        <div style="color:#888;font-size:0.98em;padding:0 8px;">Scan to send $10 in AlphaUSD (TIP-20) - everything pre-filled, just confirm!</div>
       </div>
     </div>
     <div class="setup-guide">
@@ -631,14 +769,34 @@ const { receipt } = await client.token.transferSync({
     <span style="color:#1e90ff;">For full wallet integration and payment flows, use <a href='https://wagmi.sh/tempo' target='_blank'>Wagmi</a>, <a href='https://thirdweb.com/tempo-testnet' target='_blank'>thirdweb</a>, or <a href='https://viem.sh/tempo' target='_blank'>Viem</a> as recommended in the <a href='https://docs.tempo.xyz/sdk/typescript' target='_blank'>Tempo SDK docs</a>.</span>
     <div style="margin-top:24px;padding-top:24px;border-top:1px solid #e0e0e0;">
       <div style="font-size:0.9em;color:#666;margin-bottom:8px;">💝 Support this project with a donation:</div>
-      <div style="display:inline-flex;align-items:center;background:#f4f8fb;padding:8px 12px;border-radius:8px;font-family:monospace;font-size:0.9em;color:#222;">
-        <span id="donation-address">0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f</span>
-        <button onclick="copyDonationAddress()" style="margin-left:8px;background:var(--tempo-blue);color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:0.85em;">Copy</button>
+      <div class="donation-box" style="display:inline-flex;align-items:center;background:#f4f8fb;padding:8px 12px;border-radius:8px;font-family:monospace;font-size:0.9em;color:#222;max-width:100%;">
+        <span id="donation-address" style="word-break:break-all;overflow-wrap:break-word;">0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f</span>
+        <button onclick="copyDonationAddress()" style="margin-left:8px;background:var(--tempo-blue);color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:0.85em;white-space:nowrap;">Copy</button>
       </div>
       <div id="copy-feedback" style="color:var(--tempo-cyan);font-size:0.85em;margin-top:8px;visibility:hidden;">✓ Address copied!</div>
     </div>
   </footer>
   <script>
+    function toggleMobileMenu() {
+      const navLinks = document.getElementById('navLinks');
+      const hamburger = document.querySelector('.hamburger');
+      navLinks.classList.toggle('active');
+      hamburger.classList.toggle('active');
+    }
+    
+    // Close mobile menu when clicking a link
+    document.addEventListener('DOMContentLoaded', function() {
+      const navLinks = document.querySelectorAll('.nav-links a');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          if (window.innerWidth <= 968) {
+            document.getElementById('navLinks').classList.remove('active');
+            document.querySelector('.hamburger').classList.remove('active');
+          }
+        });
+      });
+    });
+    
     function copyDonationAddress() {
       const address = '0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f';
       navigator.clipboard.writeText(address).then(() => {
