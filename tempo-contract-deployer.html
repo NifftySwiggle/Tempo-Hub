@@ -24,7 +24,7 @@
       background: #f7fafd;
       color: #222;
       height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
     }
@@ -97,6 +97,221 @@
       overflow-y: auto;
       padding: 16px;
       border-right: 1px solid #333;
+    }
+    
+    .template-dropdown-toggle {
+      display: none;
+      background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      margin: 12px;
+      width: calc(100% - 24px);
+      text-align: left;
+      position: relative;
+    }
+    
+    .template-dropdown-toggle::after {
+      content: '\25bc';
+      position: absolute;
+      right: 20px;
+      transition: transform 0.3s;
+    }
+    
+    .template-dropdown-toggle.active::after {
+      transform: rotate(180deg);
+    }
+    
+    @media (max-width: 968px) {
+      .main-container {
+        flex-direction: column;
+      }
+      
+      .sidebar {
+        width: 100%;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        border-right: none;
+        border-bottom: 1px solid #333;
+        padding: 0;
+      }
+      
+      .sidebar.open {
+        max-height: 400px;
+        padding: 12px;
+        overflow-y: auto;
+      }
+      
+      .template-dropdown-toggle {
+        display: block;
+      }
+      
+      .sidebar h3 {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+      
+      .output-panel {
+        width: 100%;
+        max-height: 300px;
+        border-left: none;
+        border-top: 2px solid #e0e0e0;
+      }
+      
+      .navbar {
+        padding: 12px 16px;
+      }
+      
+      .navbar h1 {
+        font-size: 1.2rem;
+      }
+      
+      .navbar-right {
+        gap: 8px;
+      }
+      
+      .nav-link {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+      
+      .wallet-btn {
+        padding: 6px 14px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .navbar {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px;
+      }
+      
+      .navbar-right {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+      
+      .sidebar {
+        padding: 12px;
+      }
+      
+      .template-item {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+      
+      .editor-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      
+      .btn {
+        flex: 1;
+        min-width: 120px;
+        padding: 10px 12px;
+      }
+      
+      .editor-header {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      
+      .editor-title {
+        width: 100%;
+        font-size: 1rem;
+      }
+      
+      .form-group input {
+        font-size: 16px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        height: auto;
+        min-height: 100vh;
+      }
+      
+      .navbar h1 {
+        font-size: 1rem;
+      }
+      
+      .nav-link, .wallet-btn {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+      }
+      
+      .blank-contract-btn {
+        padding: 12px;
+        font-size: 0.9rem;
+      }
+      
+      .sidebar {
+        max-height: 180px;
+        padding: 10px;
+      }
+      
+      .sidebar.open {
+        max-height: 300px;
+      }
+      
+      .template-item {
+        padding: 12px 10px;
+        margin-bottom: 6px;
+        min-height: 44px;
+      }
+      
+      .template-title {
+        font-size: 0.9rem;
+      }
+      
+      .template-desc {
+        font-size: 0.75rem;
+      }
+      
+      .btn {
+        font-size: 0.85rem;
+        padding: 10px;
+        min-width: 100px;
+      }
+      
+      .editor-panel {
+        min-height: 400px;
+      }
+      
+      .CodeMirror {
+        font-size: 12px !important;
+      }
+      
+      .output-panel {
+        max-height: 250px;
+      }
+      
+      .output-header, .editor-header {
+        padding: 10px 12px;
+      }
+      
+      .info-modal-content, .donate-modal-content {
+        margin: 10px;
+        padding: 20px;
+        max-width: calc(100vw - 20px);
+      }
+      
+      .info-modal h2 {
+        font-size: 1.4rem;
+      }
+      
+      .info-modal h3 {
+        font-size: 1.1rem;
+      }
     }
     
     .sidebar h3 {
@@ -602,6 +817,215 @@
       font-size: 0.9rem;
       text-align: center;
     }
+    
+    .contract-interaction {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    
+    .contract-interaction h4 {
+      color: var(--tempo-blue);
+      margin-bottom: 12px;
+      font-size: 1.1rem;
+    }
+    
+    .function-item {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-left: 4px solid var(--tempo-blue);
+    }
+    
+    .function-item.read {
+      border-left-color: #17a2b8;
+    }
+    
+    .function-item.write {
+      border-left-color: #ffc107;
+    }
+    
+    .function-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .function-name {
+      font-weight: 600;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #222;
+    }
+    
+    .function-type {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    
+    .function-type.read {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+    
+    .function-type.write {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .function-params {
+      margin-bottom: 8px;
+    }
+    
+    .param-input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      font-family: monospace;
+    }
+    
+    .function-call-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    
+    .function-call-btn.read {
+      background: #17a2b8;
+      color: #fff;
+    }
+    
+    .function-call-btn.write {
+      background: #ffc107;
+      color: #000;
+    }
+    
+    .function-call-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    .function-result {
+      margin-top: 8px;
+      padding: 8px;
+      background: #e8f5e9;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      word-break: break-all;
+      display: none;
+    }
+    
+    .function-result.error {
+      background: #fff5f5;
+      color: #dc3545;
+    }
+    
+    .abi-section {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+    
+    .abi-section h5 {
+      margin-bottom: 8px;
+      color: var(--tempo-blue);
+      font-size: 0.95rem;
+    }
+    
+    .abi-code {
+      background: #f4f8fb;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      max-height: 200px;
+      overflow-y: auto;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+    
+    .copy-abi-btn {
+      margin-top: 8px;
+      padding: 6px 12px;
+      background: var(--tempo-blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .copy-abi-btn:hover {
+      background: var(--tempo-cyan);
+    }
+    
+    .load-contract-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      color: #fff;
+    }
+    
+    .load-contract-section h4 {
+      margin-bottom: 12px;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .load-contract-input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      font-family: monospace;
+      background: rgba(255,255,255,0.9);
+      color: #333;
+    }
+    
+    .load-contract-btn {
+      padding: 10px 20px;
+      background: #fff;
+      color: #667eea;
+      border: none;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+      width: 100%;
+    }
+    
+    .load-contract-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .load-contract-info {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -617,6 +1041,7 @@
   </div>
 
   <div class="main-container">
+    <button class="template-dropdown-toggle" onclick="toggleTemplateDropdown()">📋 Contract Templates</button>
     <div class="sidebar">
       <h3>Contract Editor</h3>
       <button class="blank-contract-btn" onclick="loadTemplate('blank')">
@@ -641,6 +1066,30 @@
 
     <div class="output-panel">
       <div class="output-header">📊 Output & Deployment</div>
+      
+      <!-- Load Existing Contract Section -->
+      <div class="load-contract-section">
+        <h4>🔗 Load Existing Contract</h4>
+        <input 
+          type="text" 
+          class="load-contract-input" 
+          id="existingContractAddress" 
+          placeholder="0x... Contract Address"
+        />
+        <textarea 
+          class="load-contract-input" 
+          id="existingContractABI" 
+          placeholder='Paste Contract ABI JSON (e.g. [{"type":"function"...}])'
+          rows="3"
+        ></textarea>
+        <button class="load-contract-btn" onclick="loadExistingContract()">
+          🔍 Load & Interact with Contract
+        </button>
+        <div class="load-contract-info">
+          💡 Paste a contract address and its ABI to interact with any deployed contract
+        </div>
+      </div>
+      
       <div class="output-content" id="outputContent">
         <div class="status-message status-info">
           👋 <strong>Welcome to Niffty Contract Deployer!</strong><br><br>
@@ -794,7 +1243,6 @@
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/solc@0.8.19/solc.min.js"></script>
   <script>
     const TEMPO_CHAIN_ID = '0xA5BF'; // 42431
     const TEMPO_RPC = 'https://rpc.moderato.tempo.xyz';
@@ -803,6 +1251,84 @@
     let currentTemplate = null;
     let walletAddress = null;
     let compiledContract = null;
+    let deployedContractAddress = null;
+    let deployedContractABI = null;
+
+
+    // Extract ABI from Solidity code
+    function extractABI(code) {
+      const abi = [];
+      
+      // Extract functions (public and external)
+      const functionRegex = /function\s+(\w+)\s*\(([^)]*)\)\s*(?:public|external)?\s*(view|pure)?\s*(?:returns\s*\(([^)]*)\))?/g;
+      let match;
+      
+      while ((match = functionRegex.exec(code)) !== null) {
+        const [, name, params, stateMutability, outputs] = match;
+        
+        // Skip constructor
+        if (name === 'constructor') continue;
+        
+        const functionAbi = {
+          name: name,
+          type: 'function',
+          stateMutability: stateMutability || 'nonpayable',
+          inputs: parseParameters(params),
+          outputs: parseParameters(outputs || '')
+        };
+        
+        abi.push(functionAbi);
+      }
+      
+      // Extract constructor
+      const constructorRegex = /constructor\s*\(([^)]*)\)/;
+      const constructorMatch = code.match(constructorRegex);
+      if (constructorMatch) {
+        abi.push({
+          type: 'constructor',
+          stateMutability: 'nonpayable',
+          inputs: parseParameters(constructorMatch[1])
+        });
+      }
+      
+      return abi;
+    }
+    
+    function parseParameters(paramString) {
+      if (!paramString || paramString.trim() === '') return [];
+      
+      const params = [];
+      const paramPairs = paramString.split(',').map(p => p.trim());
+      
+      for (const pair of paramPairs) {
+        const parts = pair.split(/\s+/).filter(p => p); // Remove empty strings
+        if (parts.length === 0) continue;
+        
+        // Filter out storage location keywords
+        const filtered = parts.filter(p => 
+          p !== 'memory' && 
+          p !== 'calldata' && 
+          p !== 'storage' &&
+          p !== 'indexed'
+        );
+        
+        if (filtered.length >= 2) {
+          // Type is first, name is last (in case of complex types like uint256[])
+          params.push({
+            type: filtered[0],
+            name: filtered[filtered.length - 1]
+          });
+        } else if (filtered.length === 1) {
+          // Only type provided, no parameter name
+          params.push({
+            type: filtered[0],
+            name: ''
+          });
+        }
+      }
+      
+      return params;
+    }
 
     // Contract templates
     const templates = [
@@ -1742,11 +2268,24 @@ contract TIP20Escrow {
 
       // Update active state
       document.querySelectorAll('.template-item').forEach((item, idx) => {
-        item.classList.toggle('active', templates[idx].id === templateId);
+        // Skip first template (blank) since it's not in the list
+        item.classList.toggle('active', templates[idx + 1].id === templateId);
       });
 
       clearOutput();
       addOutput(`<div class="status-message status-info">📝 Loaded template: <strong>${currentTemplate.name}</strong></div>`);
+      
+      // Close dropdown on mobile after selection
+      if (window.innerWidth <= 968) {
+        toggleTemplateDropdown();
+      }
+    }
+    
+    function toggleTemplateDropdown() {
+      const sidebar = document.querySelector('.sidebar');
+      const toggle = document.querySelector('.template-dropdown-toggle');
+      sidebar.classList.toggle('open');
+      if (toggle) toggle.classList.toggle('active');
     }
 
     function showInfoModal() {
@@ -1885,10 +2424,9 @@ contract TIP20Escrow {
     async function compileContract() {
       const code = editor.getValue();
       
-      addOutput(`<div class="status-message status-info">🔨 Compiling contract...</div>`);
+      addOutput(`<div class="status-message status-info">🔨 Validating contract...</div>`);
 
       try {
-        // Simple compilation check (in production, you'd use actual solc)
         if (!code.includes('pragma solidity')) {
           throw new Error('Missing Solidity version pragma');
         }
@@ -1896,26 +2434,43 @@ contract TIP20Escrow {
           throw new Error('No contract definition found');
         }
 
-        // Mock compilation success
-        compiledContract = {
-          abi: [],
-          bytecode: '0x' + '60806040'.repeat(50) // Mock bytecode
-        };
+        // Extract contract name
+        const contractNameMatch = code.match(/contract\s+(\w+)/);
+        if (!contractNameMatch) {
+          throw new Error('Could not find contract name');
+        }
+        const contractName = contractNameMatch[1];
+        
+        // Extract ABI from code
+        const abi = extractABI(code);
+        
+        // Encode contract for Remix
+        const encodedCode = btoa(unescape(encodeURIComponent(code)));
+        const remixUrl = `https://remix.ethereum.org/#code=${encodedCode}&lang=sol&optimize=true`;
 
         addOutput(`
           <div class="compile-result">
-            <h4>✅ Compilation Successful</h4>
-            <pre>Contract compiled successfully!
-Ready to deploy to Tempo Testnet.</pre>
+            <h4>✅ Contract Validated: ${contractName}</h4>
+            <pre>Functions Found: ${abi.filter(i => i.type === 'function').length}
+Ready to compile in Remix!</pre>
           </div>
         `);
 
-        // Show deployment section
+        // Show Remix integration
         addOutput(`
-          <div class="deploy-section">
-            <h4>🚀 Deploy Contract</h4>
-            <p style="font-size:0.85rem;color:#666;margin-bottom:12px;">
-              Click "Deploy" button to deploy this contract to Tempo Testnet.
+          <div class="deploy-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 8px;">
+            <h4 style="color: white; margin-bottom: 12px;">🚀 Compile & Deploy with Remix</h4>
+            <p style="font-size:0.9rem; margin-bottom: 12px; opacity: 0.95;">
+              Click below to open this contract in Remix IDE for compilation and deployment:
+            </p>
+            <a href="${remixUrl}" target="_blank" style="display: inline-block; background: white; color: #667eea; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-bottom: 12px;">
+              📝 Open in Remix IDE →
+            </a>
+            <p style="font-size:0.85rem; opacity: 0.9; line-height: 1.5;">
+              <strong>After deploying in Remix:</strong><br>
+              1. Copy the deployed contract address<br>
+              2. Copy the ABI from Remix<br>
+              3. Use "Load Existing Contract" section above to interact
             </p>
           </div>
         `);
@@ -1930,61 +2485,19 @@ Ready to deploy to Tempo Testnet.</pre>
     }
 
     async function deployContract() {
-      if (!walletAddress) {
-        addOutput(`<div class="status-message status-error">❌ Please connect your wallet first</div>`);
-        return;
-      }
-
-      if (!compiledContract) {
-        addOutput(`<div class="status-message status-error">❌ Please compile the contract first</div>`);
-        return;
-      }
-
-      try {
-        addOutput(`<div class="status-message status-info"><div class="loading"></div> Deploying contract to Tempo Testnet...</div>`);
-
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const signer = provider.getSigner();
-
-        // Create contract factory (simplified - in production use actual ABI and bytecode)
-        const code = editor.getValue();
-        
-        // For demo: deploy a simple contract
-        const simpleContractCode = '0x608060405234801561001057600080fd5b50610150806100206000396000f3fe608060405234801561001057600080fd5b50600436106100365760003560e01c806360fe47b11461003b5780636d4ce63c14610057575b600080fd5b610055600480360381019061005091906100c3565b610075565b005b61005f61007f565b60405161006c91906100ff565b60405180910390f35b8060008190555050565b60008054905090565b600080fd5b6000819050919050565b6100a08161008d565b81146100ab57600080fd5b50565b6000813590506100bd81610097565b92915050565b6000602082840312156100d9576100d8610088565b5b60006100e7848285016100ae565b91505092915050565b6100f98161008d565b82525050565b600060208201905061011460008301846100f0565b9291505056fea2646970667358221220962a2cb93e14b7f0b0e3e3e8d3c2a8f0b9e8e8e8e8e8e8e8e8e8e8e8e8e8e864736f6c63430008130033';
-
-        const tx = await signer.sendTransaction({
-          data: simpleContractCode,
-          gasLimit: 1000000
-        });
-
-        addOutput(`<div class="status-message status-info"><div class="loading"></div> Transaction sent! Waiting for confirmation...</div>`);
-
-        const receipt = await tx.wait();
-
-        addOutput(`
-          <div class="deployed-contract">
-            <h4>✅ Contract Deployed Successfully!</h4>
-            <div style="margin-top:8px;">
-              <strong>Contract Address:</strong>
-              <div class="address">${receipt.contractAddress}</div>
-            </div>
-            <div style="margin-top:8px;">
-              <strong>Transaction:</strong>
-              <div class="address">
-                <a href="https://explore.tempo.xyz/tx/${receipt.transactionHash}" target="_blank" style="color:var(--tempo-blue);">
-                  ${receipt.transactionHash}
-                </a>
-              </div>
-            </div>
-            <div style="margin-top:8px;">
-              <strong>Block:</strong> ${receipt.blockNumber}
-            </div>
-          </div>
-        `);
-      } catch (err) {
-        console.error('Deployment error:', err);
-        addOutput(`<div class="status-message status-error">❌ Deployment failed: ${err.message}</div>`);
-      }
+      addOutput(`
+        <div class="status-message status-info">
+          <h4>💡 Deploy Using Remix</h4>
+          <p style="margin-top:8px;line-height:1.6;">
+            Click the "🔨 Compile" button to open this contract in Remix IDE,<br>
+            then use Remix to compile and deploy to Tempo Testnet.<br><br>
+            <strong>Tempo Network Details:</strong><br>
+            • Chain ID: 42431 (0xA5BF)<br>
+            • RPC: https://rpc.moderato.tempo.xyz<br>
+            • Explorer: https://explore.tempo.xyz
+          </p>
+        </div>
+      `);
     }
 
     function clearOutput() {
@@ -1995,6 +2508,278 @@ Ready to deploy to Tempo Testnet.</pre>
       const output = document.getElementById('outputContent');
       output.innerHTML += html;
       output.scrollTop = output.scrollHeight;
+    }
+    
+    function showContractInteraction(address, abi) {
+      const functionsAbi = abi.filter(item => item.type === 'function');
+      
+      if (functionsAbi.length === 0) {
+        addOutput('<div class="status-message status-info">No public functions found in this contract.</div>');
+        return;
+      }
+      
+      let interactionHtml = `
+        <div class="contract-interaction">
+          <h4>🔧 Interact with Contract</h4>
+      `;
+      
+      // Add ABI section
+      interactionHtml += `
+        <div class="abi-section">
+          <h5>📄 Contract ABI</h5>
+          <div class="abi-code" id="abiCode">${JSON.stringify(abi, null, 2)}</div>
+          <button class="copy-abi-btn" onclick="copyABI()">📋 Copy ABI</button>
+        </div>
+      `;
+      
+      // Group functions by type
+      const readFunctions = functionsAbi.filter(f => f.stateMutability === 'view' || f.stateMutability === 'pure');
+      const writeFunctions = functionsAbi.filter(f => f.stateMutability !== 'view' && f.stateMutability !== 'pure');
+      
+      // Add read functions
+      if (readFunctions.length > 0) {
+        interactionHtml += '<h5 style="margin-top: 16px; margin-bottom: 8px; color: #17a2b8;">📖 Read Functions</h5>';
+        readFunctions.forEach((func, idx) => {
+          interactionHtml += createFunctionUI(func, idx, 'read');
+        });
+      }
+      
+      // Add write functions
+      if (writeFunctions.length > 0) {
+        interactionHtml += '<h5 style="margin-top: 16px; margin-bottom: 8px; color: #ffc107;">✏️ Write Functions</h5>';
+        writeFunctions.forEach((func, idx) => {
+          interactionHtml += createFunctionUI(func, idx, 'write');
+        });
+      }
+      
+      interactionHtml += '</div>';
+      addOutput(interactionHtml);
+    }
+    
+    function createFunctionUI(func, idx, type) {
+      const funcId = `func_${type}_${idx}`;
+      let html = `
+        <div class="function-item ${type}">
+          <div class="function-header">
+            <span class="function-name">${func.name}</span>
+            <span class="function-type ${type}">${type === 'read' ? 'READ' : 'WRITE'}</span>
+          </div>
+      `;
+      
+      // Add parameter inputs
+      if (func.inputs.length > 0) {
+        html += '<div class="function-params">';
+        func.inputs.forEach((input, paramIdx) => {
+          html += `
+            <input 
+              type="text" 
+              class="param-input" 
+              id="${funcId}_param_${paramIdx}" 
+              placeholder="${input.name} (${input.type})"
+            />
+          `;
+        });
+        html += '</div>';
+      }
+      
+      // Add call button
+      html += `
+        <button class="function-call-btn ${type}" onclick="callContractFunction('${func.name}', ${idx}, '${type}')">
+          ${type === 'read' ? '🔍 Call' : '📝 Transact'}
+        </button>
+        <div class="function-result" id="${funcId}_result"></div>
+      `;
+      
+      html += '</div>';
+      return html;
+    }
+    
+    async function callContractFunction(functionName, idx, type) {
+      if (!walletAddress) {
+        alert('Please connect your wallet first');
+        return;
+      }
+      
+      const funcId = `func_${type}_${idx}`;
+      const resultDiv = document.getElementById(`${funcId}_result`);
+      
+      // Get the correct function from ABI
+      const functionsAbi = deployedContractABI.filter(f => f.type === 'function');
+      const readFunctions = functionsAbi.filter(f => f.stateMutability === 'view' || f.stateMutability === 'pure');
+      const writeFunctions = functionsAbi.filter(f => f.stateMutability !== 'view' && f.stateMutability !== 'pure');
+      const func = type === 'read' ? readFunctions[idx] : writeFunctions[idx];
+      
+      if (!func) {
+        resultDiv.style.display = 'block';
+        resultDiv.className = 'function-result error';
+        resultDiv.textContent = 'Function not found';
+        return;
+      }
+      
+      // Get and convert parameter values
+      const params = [];
+      try {
+        for (let i = 0; i < func.inputs.length; i++) {
+          const paramInput = document.getElementById(`${funcId}_param_${i}`);
+          if (paramInput) {
+            const value = paramInput.value.trim();
+            const paramType = func.inputs[i].type;
+            
+            // Convert parameter based on type
+            if (paramType === 'bytes32') {
+              // Convert string to bytes32
+              if (value.startsWith('0x') && value.length === 66) {
+                params.push(value); // Already proper bytes32
+              } else {
+                params.push(ethers.utils.formatBytes32String(value));
+              }
+            } else if (paramType === 'address') {
+              // Validate and checksum address
+              params.push(ethers.utils.getAddress(value));
+            } else if (paramType.startsWith('uint') || paramType.startsWith('int')) {
+              // Handle integers
+              params.push(value);
+            } else if (paramType.startsWith('bytes')) {
+              // Handle bytes
+              if (!value.startsWith('0x')) {
+                params.push('0x' + value);
+              } else {
+                params.push(value);
+              }
+            } else {
+              // Default: use as-is
+              params.push(value);
+            }
+          }
+        }
+      } catch (conversionError) {
+        resultDiv.style.display = 'block';
+        resultDiv.className = 'function-result error';
+        resultDiv.textContent = `Parameter conversion error: ${conversionError.message}`;
+        return;
+      }
+      
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        
+        // Create minimal ABI for this function
+        const funcAbi = [func];
+        const contract = new ethers.Contract(deployedContractAddress, funcAbi, type === 'read' ? provider : signer);
+        
+        resultDiv.style.display = 'block';
+        resultDiv.className = 'function-result';
+        resultDiv.textContent = '⏳ Processing...';
+        
+        if (type === 'read') {
+          // Call read function
+          const result = await contract[functionName](...params);
+          resultDiv.textContent = `Result: ${result.toString()}`;
+        } else {
+          // Send transaction with gas limit handling
+          try {
+            const tx = await contract[functionName](...params);
+            resultDiv.textContent = `⏳ Transaction sent: ${tx.hash}\nWaiting for confirmation...`;
+            
+            const receipt = await tx.wait();
+            resultDiv.textContent = `✅ Transaction confirmed!\nBlock: ${receipt.blockNumber}\nGas used: ${receipt.gasUsed.toString()}`;
+          } catch (gasError) {
+            // If gas estimation fails, retry with manual gas limit
+            if (gasError.code === 'UNPREDICTABLE_GAS_LIMIT') {
+              resultDiv.textContent = '⚠️ Gas estimation failed. Retrying with manual gas limit...';
+              const tx = await contract[functionName](...params, { gasLimit: 500000 });
+              resultDiv.textContent = `⏳ Transaction sent: ${tx.hash}\nWaiting for confirmation...`;
+              
+              const receipt = await tx.wait();
+              resultDiv.textContent = `✅ Transaction confirmed!\nBlock: ${receipt.blockNumber}\nGas used: ${receipt.gasUsed.toString()}`;
+            } else {
+              throw gasError;
+            }
+          }
+        }
+      } catch (error) {
+        resultDiv.style.display = 'block';
+        resultDiv.className = 'function-result error';
+        let errorMsg = error.message || error;
+        
+        // Better error messages
+        if (error.code === 'CALL_EXCEPTION') {
+          errorMsg = '❌ Transaction reverted. Check that:\n- Contract exists at this address\n- Parameters are correct\n- You have permission to call this function\n\nDetails: ' + errorMsg;
+        } else if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
+          errorMsg = '❌ Cannot estimate gas. Transaction may fail.\nDetails: ' + errorMsg;
+        }
+        
+        resultDiv.textContent = `Error: ${errorMsg}`;
+      }
+    }
+    
+    
+    async function loadExistingContract() {
+      const addressInput = document.getElementById('existingContractAddress');
+      const abiInput = document.getElementById('existingContractABI');
+      
+      const address = addressInput.value.trim();
+      const abiText = abiInput.value.trim();
+      
+      if (!address) {
+        alert('Please enter a contract address');
+        return;
+      }
+      
+      if (!abiText) {
+        alert('Please paste the contract ABI');
+        return;
+      }
+      
+      try {
+        // Validate address
+        const validAddress = ethers.utils.getAddress(address);
+        
+        // Parse ABI
+        let abi;
+        try {
+          abi = JSON.parse(abiText);
+        } catch (e) {
+          alert('Invalid ABI format. Please paste valid JSON.');
+          return;
+        }
+        
+        // Check if contract exists
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const code = await provider.getCode(validAddress);
+        
+        if (code === '0x') {
+          alert('No contract found at this address. Please check the address.');
+          return;
+        }
+        
+        // Set global variables
+        deployedContractAddress = validAddress;
+        deployedContractABI = abi;
+        
+        // Clear output and show interaction UI
+        const outputContent = document.getElementById('outputContent');
+        outputContent.innerHTML = '';
+        
+        addOutput(`<div class="status-message status-success">✅ Contract loaded successfully at: ${validAddress}</div>`);
+        showContractInteraction(validAddress, abi);
+        
+        // Clear inputs
+        addressInput.value = '';
+        abiInput.value = '';
+        
+      } catch (error) {
+        alert(`Error loading contract: ${error.message}`);
+      }
+    }
+    
+    function copyABI() {
+      const abiCode = document.getElementById('abiCode').textContent;
+      navigator.clipboard.writeText(abiCode).then(() => {
+        alert('ABI copied to clipboard!');
+      }).catch(err => {
+        console.error('Failed to copy ABI:', err);
+      });
     }
   </script>
   <footer style="text-align:center;padding:16px;color:#888;font-size:0.85em;background:#16161e;">
