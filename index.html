@@ -77,6 +77,127 @@
       transition: background-color 0.3s ease;
     }
     
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .hamburger {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+      background: transparent;
+      border: none;
+      z-index: 102;
+    }
+    
+    .hamburger span {
+      width: 25px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    
+    .hamburger.active span:nth-child(1) {
+      transform: rotate(45deg) translate(8px, 8px);
+    }
+    
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .hamburger.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(7px, -7px);
+    }
+    
+    .dropdown-menu {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: var(--navbar-bg);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(30,144,255,0.15);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+      z-index: 99;
+    }
+    
+    .dropdown-menu.active {
+      max-height: calc(100vh - 70px);
+      padding: 24px 0;
+      overflow-y: auto;
+    }
+    
+    .dropdown-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    
+    .dropdown-section {
+      margin-bottom: 24px;
+    }
+    
+    .dropdown-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-tertiary);
+      margin-bottom: 12px;
+    }
+    
+    .dropdown-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+    
+    .dropdown-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--tempo-card);
+      border-radius: 8px;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    
+    .dropdown-link:hover {
+      border-color: var(--tempo-blue);
+      transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(30,144,255,0.15);
+    }
+    
+    .dropdown-link-icon {
+      font-size: 1.5rem;
+    }
+    
+    .dropdown-link-text {
+      flex: 1;
+    }
+    
+    .dropdown-link-title {
+      font-weight: 600;
+      color: var(--tempo-blue);
+      font-size: 0.95rem;
+    }
+    
+    .dropdown-link-desc {
+      font-size: 0.8rem;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+    
     .navbar-center {
       display: flex;
       align-items: center;
@@ -116,6 +237,10 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+    
+    .navbar-links {
+      display: none;
     }
     
     .navbar-links a {
@@ -444,6 +569,12 @@
       visibility: hidden;
     }
     
+    @media (max-width: 968px) {
+      .dropdown-links {
+        grid-template-columns: 1fr;
+      }
+    }
+    
     @media (max-width: 768px) {
       .hero h1 {
         font-size: 2.5rem;
@@ -460,19 +591,16 @@
       
       .navbar {
         padding: 0 16px;
-        flex-direction: column;
-        height: auto;
-        padding-top: 16px;
-        padding-bottom: 16px;
+        height: 70px;
       }
       
-      .navbar-links {
-        margin-top: 12px;
+      .navbar-center {
+        gap: 12px;
       }
       
-      .navbar-links a {
-        margin-left: 16px;
-        font-size: 0.9rem;
+      .theme-toggle {
+        padding: 8px 16px;
+        font-size: 0.85rem;
       }
       
       .cards-grid {
@@ -486,12 +614,23 @@
       .cta-title {
         font-size: 2rem;
       }
+      
+      .dropdown-content {
+        padding: 0 16px;
+      }
     }
   </style>
 </head>
 <body>
   <nav class="navbar">
-    <div class="navbar-brand">⚡ Tempo Hub</div>
+    <div class="navbar-left">
+      <button class="hamburger" onclick="toggleMenu()" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="navbar-brand">⚡ Tempo Hub</div>
+    </div>
     <div class="navbar-center">
       <div class="navbar-links">
         <a href="https://docs.tempo.xyz/" target="_blank">Docs</a>
@@ -503,6 +642,85 @@
       </button>
     </div>
   </nav>
+  
+  <div class="dropdown-menu" id="dropdownMenu">
+    <div class="dropdown-content">
+      <div class="dropdown-section">
+        <div class="dropdown-section-title">Payment Templates</div>
+        <div class="dropdown-links">
+          <a href="/tempohub/tempo-pos.html" class="dropdown-link">
+            <span class="dropdown-link-icon">💳</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">POS Terminal</div>
+              <div class="dropdown-link-desc">Hardware-integrated Point of Sale</div>
+            </div>
+          </a>
+          <a href="/tempohub/tempo-kits.html" class="dropdown-link">
+            <span class="dropdown-link-icon">🧩</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Payment Kits</div>
+              <div class="dropdown-link-desc">Plug & play integration templates</div>
+            </div>
+          </a>
+          <a href="/tempohub/tempo-market-demo.html" class="dropdown-link">
+            <span class="dropdown-link-icon">🛒</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Market Demo</div>
+              <div class="dropdown-link-desc">Marketplace payment integration</div>
+            </div>
+          </a>
+          <a href="/tempohub/tempo-receipt.html" class="dropdown-link">
+            <span class="dropdown-link-icon">🧾</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Receipt Book</div>
+              <div class="dropdown-link-desc">Transaction tracking & accounting</div>
+            </div>
+          </a>
+        </div>
+      </div>
+      
+      <div class="dropdown-section">
+        <div class="dropdown-section-title">Developer Tools</div>
+        <div class="dropdown-links">
+          <a href="/tempohub/tempo-contract-deployer.html" class="dropdown-link">
+            <span class="dropdown-link-icon">📝</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Contract Deployer</div>
+              <div class="dropdown-link-desc">Deploy smart contracts to Tempo</div>
+            </div>
+          </a>
+          <a href="https://docs.tempo.xyz/" target="_blank" class="dropdown-link">
+            <span class="dropdown-link-icon">📚</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Documentation</div>
+              <div class="dropdown-link-desc">API references & tutorials</div>
+            </div>
+          </a>
+          <a href="https://docs.tempo.xyz/sdk/typescript" target="_blank" class="dropdown-link">
+            <span class="dropdown-link-icon">⚙️</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">SDK & Libraries</div>
+              <div class="dropdown-link-desc">TypeScript, Viem, Wagmi tools</div>
+            </div>
+          </a>
+          <a href="https://docs.tempo.xyz/quickstart/faucet" target="_blank" class="dropdown-link">
+            <span class="dropdown-link-icon">🚰</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Testnet Faucet</div>
+              <div class="dropdown-link-desc">Get free testnet tokens</div>
+            </div>
+          </a>
+          <a href="https://explore.tempo.xyz" target="_blank" class="dropdown-link">
+            <span class="dropdown-link-icon">🔍</span>
+            <div class="dropdown-link-text">
+              <div class="dropdown-link-title">Block Explorer</div>
+              <div class="dropdown-link-desc">View transactions & analytics</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="hero">
     <div class="hero-content">
@@ -536,7 +754,7 @@
     
     <div class="cards-grid">
       <!-- POS Terminal Card -->
-      <a href="tempo-pos.html" class="card">
+      <a href="/tempohub/tempo-pos.html" class="card">
        <!-- <span class="coming-soon-badge">Coming Soon</span> -->
         <div class="card-icon">💳</div>
         <h3 class="card-title">Tempo POS Terminal</h3>
@@ -553,7 +771,7 @@
       </a>
 
       <!-- Payment Kits Card -->
-      <a href="tempo-kits.html" class="card">
+      <a href="/tempohub/tempo-kits.html" class="card">
         <div class="card-icon">🧩</div>
         <h3 class="card-title">Plug & Play Payment Kits</h3>
         <p class="card-description">
@@ -570,7 +788,7 @@
       </a>
 
       <!-- Market Demo Card -->
-      <a href="tempo-market-demo.html" class="card">
+      <a href="/tempohub/tempo-market-demo.html" class="card">
         <div class="card-icon">🛒</div>
         <h3 class="card-title">Market Payment Demo</h3>
         <p class="card-description">
@@ -585,7 +803,7 @@
       </a>
 
       <!-- Receipt Book Card -->
-      <a href="tempo-receipt.html" class="card">
+      <a href="/tempohub/tempo-receipt.html" class="card">
         <div class="card-icon">🧾</div>
         <h3 class="card-title">Receipt Book</h3>
         <p class="card-description">
@@ -600,7 +818,7 @@
       </a>
 
       <!-- Contract Deployer Card -->
-      <a href="tempo-contract-deployer.html" class="card">
+      <a href="/tempohub/tempo-contract-deployer.html" class="card">
         <div class="card-icon">📝</div>
         <h3 class="card-title">Smart Contract Deployer</h3>
         <p class="card-description">
@@ -681,7 +899,7 @@
       <p class="cta-description">
         Pick a template, customize it for your needs, and start accepting stablecoin payments in minutes.
       </p>
-      <a href="tempo-kits.html" class="cta-button">View All Templates →</a>
+      <a href="/tempohub/tempo-kits.html" class="cta-button">View All Templates →</a>
     </div>
   </div>
 
@@ -709,6 +927,39 @@
   </footer>
 
   <script>
+    // Hamburger menu toggle
+    function toggleMenu() {
+      const menu = document.getElementById('dropdownMenu');
+      const hamburger = document.querySelector('.hamburger');
+      menu.classList.toggle('active');
+      hamburger.classList.toggle('active');
+    }
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+      const menu = document.getElementById('dropdownMenu');
+      const hamburger = document.querySelector('.hamburger');
+      const navbar = document.querySelector('.navbar');
+      
+      if (menu.classList.contains('active') && 
+          !menu.contains(event.target) && 
+          !hamburger.contains(event.target) &&
+          !navbar.contains(event.target)) {
+        menu.classList.remove('active');
+        hamburger.classList.remove('active');
+      }
+    });
+    
+    // Close menu when clicking a link
+    document.querySelectorAll('.dropdown-link').forEach(link => {
+      link.addEventListener('click', function() {
+        const menu = document.getElementById('dropdownMenu');
+        const hamburger = document.querySelector('.hamburger');
+        menu.classList.remove('active');
+        hamburger.classList.remove('active');
+      });
+    });
+    
     // Theme toggle functionality
     function toggleTheme() {
       const html = document.documentElement;
