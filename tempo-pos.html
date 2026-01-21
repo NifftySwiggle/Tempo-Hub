@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- 
+    © 2026 NifftySwiggle - Tempo POS Terminal
+    Original Creation Date: January 21, 2026
+    License: Proprietary - Unauthorized use or distribution prohibited
+    Unique Instance ID: TEMPO-POS-${Date.now()}-NIFFT
+    Contact: @pet_rescueNFT on X/Twitter
+    
+    This software contains unique fingerprinting and is traceable.
+    Usage is monitored and logged for security purposes.
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tempo POS Terminal - Hardware Integration</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%231e90ff;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2300e0d3;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23grad)'/%3E%3Cpath d='M30 25 L70 25 L70 35 L55 35 L55 75 L45 75 L45 35 L30 35 Z' fill='white'/%3E%3Cpath d='M62 45 L75 60 L68 60 L68 75 L58 60 L65 60 L65 45 Z' fill='white' opacity='0.9'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,600,700&display=swap">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    :root {
+      --tempo-blue: #1e90ff;
+      --tempo-cyan: #00e0d3;
+      --tempo-dark: #1a1a2e;
+      --tempo-green: #28a745;
+      --bg-gradient-1: #667eea;
+      --bg-gradient-2: #764ba2;
+      --card-bg: #fff;
+      --text-primary: #1a1a2e;
+      --text-secondary: #555;
+      --border-color: #f0f0f0;
+    }
+    
+    [data-theme="dark"] {
+      --bg-gradient-1: #1a1a2e;
+      --bg-gradient-2: #0a0e1a;
+      --card-bg: #151b2e;
+      --text-primary: #e8eaed;
+      --text-secondary: #9aa0a6;
+      --border-color: #2a3347;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+      min-height: 100vh;
+      padding: 20px;
+      transition: background 0.3s ease;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.3s ease;
+    }
+    
+    .header h1 {
+      color: var(--text-primary);
+      font-size: 2rem;
+    }
+    
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    
+    .theme-toggle {
+      background: linear-gradient(135deg, var(--tempo-blue) 0%, var(--tempo-cyan) 100%);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 2px 8px rgba(30,144,255,0.3);
+      white-space: nowrap;
+    }
+    
+    .theme-toggle:hover {
+      transform: scale(1.05);
+    }
+    
+    .status-badge {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .status-connected {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-disconnected {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+      transition: background-color 0.3s ease;
+    }
+    
+    .card h2 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--tempo-blue);
+    }
+    
+    .amount-input {
+      font-size: 2rem !important;
+      font-weight: 700;
+      text-align: center;
+    }
+    
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .quick-btn {
+      padding: 12px;
+      background: #f0f0f0;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .quick-btn:hover {
+      background: var(--tempo-blue);
+      color: #fff;
+      border-color: var(--tempo-blue);
+    }
+    
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 12px;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--tempo-blue), var(--tempo-cyan));
+      color: #fff;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(30,144,255,0.4);
+    }
+    
+    .btn-success {
+      background: var(--tempo-green);
+      color: #fff;
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: #fff;
+    }
+    
+    .qr-display {
+      text-align: center;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      min-height: 300px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #qrCanvas {
+      margin: 20px auto;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .cyd-connection {
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .cyd-input {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .cyd-input input {
+      flex: 1;
+    }
+    
+    .cyd-input button {
+      padding: 12px 24px;
+      background: var(--tempo-blue);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .transaction-log {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .log-item {
+      padding: 12px;
+      background: #f8f9fa;
+      border-left: 4px solid var(--tempo-blue);
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+    
+    .log-item.success {
+      border-left-color: var(--tempo-green);
+    }
+    
+    .log-item.error {
+      border-left-color: #dc3545;
+    }
+    
+    .receipt-preview {
+      background: #fff;
+      border: 2px dashed #ccc;
+      padding: 24px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    
+    .receipt-preview h3 {
+      text-align: center;
+      margin-bottom: 16px;
+      font-family: 'Inter', sans-serif;
+    }
+    
+    .receipt-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    
+    .receipt-divider {
+      border-top: 1px dashed #666;
+      margin: 12px 0;
+    }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.95rem;
+    }
+    
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-left: 4px solid #17a2b8;
+    }
+    
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+    
+    .refund-sidebar {
+      position: fixed;
+      left: -450px;
+      top: 0;
+      width: 450px;
+      height: 100vh;
+      background: var(--card-bg);
+      box-shadow: 2px 0 16px rgba(0,0,0,0.3);
+      transition: left 0.3s ease;
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .refund-sidebar.open {
+      left: 0;
+    }
+    
+    .refund-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      z-index: 999;
+    }
+    
+    .refund-overlay.active {
+      display: block;
+    }
+    
+    .refund-item {
+      background: var(--demo-box-bg);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--tempo-blue);
+    }
+    
+    .refund-item.refunded {
+      border-left-color: #dc3545;
+      opacity: 0.7;
+    }
+    
+    .refund-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .home-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--tempo-blue), var(--tempo-cyan));
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+    
+    .home-link:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30,144,255,0.4);
+    }
+    
+    .info-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 2000;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    
+    .info-modal-content {
+      background: var(--card-bg);
+      max-width: 700px;
+      margin: 40px auto;
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    
+    .info-modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+    }
+    
+    .info-section {
+      margin-bottom: 24px;
+    }
+    
+    .info-section h3 {
+      color: var(--tempo-blue);
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+    }
+    
+    .info-section p, .info-section li {
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    
+    .info-section ul {
+      padding-left: 20px;
+    }
+    
+    .license-box {
+      background: linear-gradient(135deg, rgba(30,144,255,0.1), rgba(0,224,211,0.1));
+      border: 2px solid var(--tempo-blue);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    
+    .license-box strong {
+      color: var(--tempo-blue);
+      font-size: 1.1rem;
+    }
+    
+    .preset-item-btn {
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .preset-item-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+    }
+    
+    .preset-item-btn .item-name {
+      font-size: 0.9rem;
+    }
+    
+    .preset-item-btn .item-price {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    
+    .preset-edit-item {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+    }
+    
+    .preset-edit-item input {
+      padding: 8px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    
+    .preset-edit-item input:first-child {
+      flex: 2;
+    }
+    
+    .preset-edit-item input:nth-child(2) {
+      flex: 1;
+    }
+    
+    .preset-edit-item button {
+      padding: 8px 12px;
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    
+    .custom-amount-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    
+    @media (max-width: 600px) {
+      .custom-amount-row {
+        flex-direction: column;
+      }
+      
+      .custom-amount-row input,
+      .custom-amount-row button {
+        width: 100% !important;
+        flex: none !important;
+      }
+    }
+    
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .receipt-preview, .receipt-preview * {
+        visibility: visible;
+      }
+      .receipt-preview {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 968px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      
+      .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      
+      .quick-amounts {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+      
+      .container {
+        max-width: 100%;
+      }
+      
+      .header {
+        padding: 16px;
+      }
+      
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .card {
+        padding: 16px;
+      }
+      
+      .card h2 {
+        font-size: 1.2rem;
+      }
+      
+      .theme-toggle, .home-link {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+      
+      .status-badge {
+        width: 100%;
+        text-align: center;
+      }
+      
+      #presetButtons {
+        grid-template-columns: 1fr !important;
+      }
+      
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        font-size: 16px;
+      }
+      
+      .amount-input {
+        font-size: 1.5rem !important;
+      }
+      
+      .cyd-input {
+        flex-direction: column;
+      }
+      
+      .cyd-input button {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 8px;
+      }
+      
+      .main-grid {
+        gap: 16px;
+      }
+      
+      .header {
+        padding: 12px;
+      }
+      
+      .header h1 {
+        font-size: 1.2rem;
+      }
+      
+      .card {
+        padding: 12px;
+      }
+      
+      .card h2 {
+        font-size: 1.1rem;
+      }
+      
+      .status-badge {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+      }
+      
+      .btn {
+        padding: 12px;
+        font-size: 0.95rem;
+      }
+      
+      .quick-amounts {
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      
+      .quick-btn {
+        padding: 10px 8px;
+        font-size: 0.9rem;
+      }
+      
+      .form-group label {
+        font-size: 0.9rem;
+      }
+      
+      .amount-input {
+        font-size: 1.3rem !important;
+      }
+      
+      .preset-item-btn {
+        padding: 10px;
+      }
+      
+      .preset-item-btn .item-name {
+        font-size: 0.85rem;
+      }
+      
+      .preset-item-btn .item-price {
+        font-size: 1rem;
+      }
+      
+      .preset-edit-item {
+        flex-direction: column;
+      }
+      
+      .preset-edit-item input {
+        width: 100% !important;
+        flex: none !important;
+      }
+      
+      .preset-edit-item button {
+        width: 100%;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .refund-sidebar {
+        width: 100%;
+        left: -100%;
+      }
+      
+      .refund-sidebar.open {
+        left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Refund Sidebar -->
+  <div class="refund-overlay" id="refundOverlay" onclick="closeRefundPanel()"></div>
+  <div class="refund-sidebar" id="refundSidebar">
+    <div class="refund-header">
+      <h2 style="margin: 0;">🔄 Refund Management</h2>
+      <button onclick="closeRefundPanel()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">✖ Close</button>
+    </div>
+    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem;">Select a transaction to process a refund</p>
+    <div id="refundList"></div>
+  </div>
+
+  <!-- Info Modal -->
+  <div id="infoModal" class="info-modal" onclick="if(event.target===this) closeInfoModal()">
+    <div class="info-modal-content">
+      <button class="info-modal-close" onclick="closeInfoModal()">×</button>
+      
+      <h2 style="color: var(--text-primary); margin-bottom: 24px; font-size: 1.8rem;">📖 Tempo POS Terminal - Information</h2>
+      
+      <div class="info-section">
+        <h3>🎯 How It Works</h3>
+        <p>This is a blockchain-powered Point of Sale terminal that accepts cryptocurrency payments on the Tempo network:</p>
+        <ul>
+          <li><strong>Add Items:</strong> Use preset menu items or add custom amounts</li>
+          <li><strong>Generate QR:</strong> Click "Generate Payment QR" to create a payment code</li>
+          <li><strong>Customer Scans:</strong> Customer scans QR with MetaMask wallet</li>
+          <li><strong>Auto-Confirm:</strong> System monitors blockchain and confirms payment</li>
+          <li><strong>Receipts:</strong> Automatic receipt generation, export to Excel/CSV</li>
+          <li><strong>Refunds:</strong> Process blockchain refunds through the refund panel</li>
+          <li><strong>Hardware:</strong> Optional CYD ESP32 display for customer-facing screen</li>
+        </ul>
+      </div>
+      
+      <div class="info-section">
+        <h3>🔧 Setup Requirements</h3>
+        <ul>
+          <li>MetaMask wallet extension installed</li>
+          <li>Connected to Tempo Testnet (Chain ID: 42431)</li>
+          <li>Merchant wallet address configured</li>
+          <li>USDC/USDT token contract addresses</li>
+          <li>Optional: CYD ESP32 display hardware</li>
+        </ul>
+      </div>
+      
+      <div class="info-section">
+        <h3>💡 Features</h3>
+        <ul>
+          <li>Multi-token support (USDC, USDT, custom tokens)</li>
+          <li>Shopping cart with preset items</li>
+          <li>Real-time payment monitoring</li>
+          <li>Receipt storage (up to 100 receipts)</li>
+          <li>Excel/CSV export for accounting</li>
+          <li>Blockchain-based refund system</li>
+          <li>Dark mode support</li>
+          <li>Hardware integration ready</li>
+        </ul>
+      </div>
+      
+      <div class="license-box">
+        <strong>⚠️ Licensed Software</strong>
+        <p style="margin-top: 12px; color: var(--text-primary); font-weight: 500;">
+          This software is proprietary and licensed. Unauthorized use, copying, or distribution is prohibited.
+        </p>
+        <p style="margin-top: 8px;">
+          <strong>For licensing inquiries and authorized use:</strong><br>
+          Contact <a href="https://x.com/pet_rescueNFT" target="_blank" style="color: var(--tempo-blue); font-weight: 600;">NifftySwiggle</a> on X/Twitter<br>
+          © 2026 NifftySwiggle - All Rights Reserved
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>💳 Tempo POS Terminal</h1>
+        <p style="color: #666; margin-top: 4px;">Hardware-Integrated Point of Sale</p>
+      </div>
+      <div class="header-actions">
+        <button class="theme-toggle" onclick="showInfoModal()" aria-label="Show Info" style="background: linear-gradient(135deg, #28a745, #20c997);">
+          ℹ️ Info
+        </button>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span id="theme-text">Dark Mode</span>
+        </button>
+        <a href="index.html" class="home-link">
+          🏠 Tempo Hub
+        </a>
+        <div id="cydStatus" class="status-badge status-disconnected">
+          CYD Disconnected
+        </div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <!-- Left Column: Payment Input -->
+      <div class="card">
+        <h2>💵 Payment Details</h2>
+        
+        <div class="cyd-connection">
+          <label style="font-weight: 600; margin-bottom: 8px; display: block;">CYD Display Connection</label>
+          <div class="cyd-input">
+            <input type="text" id="cydIP" placeholder="CYD IP Address (e.g., 192.168.1.100)" value="192.168.1.100">
+            <button onclick="connectCYD()">Connect</button>
+          </div>
+          <p style="font-size: 0.85rem; color: #666; margin-top: 8px;">
+            Enter your CYD ESP32 display IP address
+          </p>
+        </div>
+        </div>
+
+        <div class="form-group">
+          <label style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Quick Menu Items</span>
+            <button onclick="togglePresetManager()" style="background: var(--tempo-blue); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 600;">⚙️ Manage Items</button>
+          </label>
+          <div id="presetButtons" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px;">
+            <!-- Preset buttons will be populated here -->
+          </div>
+          
+          <!-- Preset Manager (hidden by default) -->
+          <div id="presetManager" style="display: none; margin-top: 16px; padding: 16px; background: #f8f9fa; border-radius: 8px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 1rem;">Manage Menu Items</h3>
+            <div id="presetItemsList">
+              <!-- Preset items list will be populated here -->
+            </div>
+            <button onclick="addNewPresetItem()" style="width: 100%; padding: 10px; background: var(--tempo-green); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px;">+ Add New Item</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Shopping Cart</label>
+          <div id="cartDisplay" style="background: #f8f9fa; border-radius: 8px; padding: 12px; min-height: 80px; max-height: 200px; overflow-y: auto; margin-bottom: 8px;">
+            <p style="color: #999; text-align: center; margin: 20px 0;">No items added</p>
+          </div>
+          <button onclick="clearCart()" class="btn btn-secondary" style="width: 100%; padding: 10px;">
+            🗑️ Clear Cart
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label>Amount (USD)</label>
+          <input type="number" id="amountInput" class="amount-input" placeholder="0.00" min="0.01" step="0.01" readonly style="background: #f0f0f0; font-weight: 700;">
+          <div style="margin: 8px 0;">
+            <label style="font-size: 0.9rem; color: #666;">Add Custom Amount:</label>
+            <div class="custom-amount-row">
+              <input type="number" id="customAmountInput" placeholder="Enter amount..." min="0.01" step="0.01" style="flex: 0 0 120px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;" onkeypress="if(event.key==='Enter'){document.getElementById('customDescInput').focus()}">
+              <input type="text" id="customDescInput" placeholder="Description (optional)" style="flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px;" onkeypress="if(event.key==='Enter'){addCustomAmountFromInput()}">
+              <button class="quick-btn" onclick="addCustomAmountFromInput()" style="width: auto; padding: 0 20px;">Add</button>
+            </div>
+          </div>
+          <div class="quick-amounts">
+            <button class="quick-btn" onclick="addCustomAmount(10)">+$10</button>
+            <button class="quick-btn" onclick="addCustomAmount(25)">+$25</button>
+            <button class="quick-btn" onclick="addCustomAmount(50)">+$50</button>
+            <button class="quick-btn" onclick="addCustomAmount(100)">+$100</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Payment Token</label>
+          <select id="tokenSelect">
+            <option value="0x20C0000000000000000000000000000000000001">AlphaUSD</option>
+            <option value="0x20C0000000000000000000000000000000000002">BetaUSD</option>
+            <option value="0x20C0000000000000000000000000000000000003">ThetaUSD</option>
+            <option value="0x20C0000000000000000000000000000000000004">PathUSD</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: none;">
+          <label>Memo / Item Description</label>
+          <textarea id="memoInput" rows="3" placeholder="e.g., Coffee and Pastry" readonly style="background: #f0f0f0;"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Merchant Address</label>
+          <div style="position: relative;">
+            <input type="text" id="merchantAddress" value="0x71074075bA6FFE0BF39aCb6EDEF09b3b6be3AB6f" readonly style="padding-right: 90px;">
+            <button id="lockBtn" onclick="toggleMerchantLock()" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.9rem; cursor: pointer; font-weight: 600;" title="Click to unlock and edit">
+              🔒 Locked
+            </button>
+          </div>
+          <small style="color: #666; font-size: 0.85rem; margin-top: 4px; display: block;">Address is locked to prevent accidental changes.</small>
+        </div>
+
+        <button class="btn btn-primary" onclick="generatePaymentQR()">
+          🔄 Generate Payment QR
+        </button>
+        
+        <button class="btn" onclick="openRefundPanel()" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);">
+          💸 Process Refunds
+        </button>
+      </div>
+
+      <!-- Right Column: QR Display -->
+      <div class="card">
+        <h2>📱 QR Code Display</h2>
+        
+        <div id="qrAlert"></div>
+        
+        <div class="qr-display">
+          <div id="qrPlaceholder" style="color: #999;">
+            <svg width="120" height="120" style="opacity: 0.3;">
+              <rect width="120" height="120" fill="none" stroke="#ccc" stroke-width="2" stroke-dasharray="5,5"/>
+              <text x="60" y="60" text-anchor="middle" dominant-baseline="middle" fill="#999" font-size="14">QR Code</text>
+            </svg>
+            <p style="margin-top: 12px;">Enter amount and click Generate</p>
+          </div>
+          <canvas id="qrCanvas" style="display: none;"></canvas>
+        </div>
+
+        <div id="paymentStatus" style="margin-top: 16px; text-align: center;"></div>
+
+        <button class="btn btn-secondary" onclick="sendQRToCYD()" id="sendCYDBtn" style="display: none;">
+          📤 Send to CYD Display
+        </button>
+      </div>
+    </div>
+
+    <!-- Transaction Log -->
+    <div class="card">
+      <h2>📋 Transaction Log</h2>
+      <div class="transaction-log" id="transactionLog">
+        <div class="alert alert-info">
+          No transactions yet. Generate a payment QR to begin.
+        </div>
+      </div>
+    </div>
+
+    <!-- Export & Manage Receipts -->
+    <div class="card">
+      <h2>💾 Export & Manage Receipts</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.95rem;">Download all receipts or export to Excel for accounting and tax purposes.</p>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="downloadAllReceipts()" style="flex: 1; min-width: 150px;">📥 Download All Receipts</button>
+        <button class="btn btn-success" onclick="exportToExcel()" style="flex: 1; min-width: 150px;">📊 Export to Excel/CSV</button>
+        <button class="btn" onclick="clearAllReceipts()" style="flex: 1; min-width: 150px; background: #dc3545; color: white;">🗑️ Clear All Receipts</button>
+      </div>
+    </div>
+
+    <!-- Receipt Preview -->
+    <div class="card" id="receiptCard" style="display: none;">
+      <h2>🧾 Tax Receipt</h2>
+      <div class="receipt-preview" id="receiptPreview"></div>
+      <button class="btn btn-success" onclick="window.print()">🖨️ Print Receipt</button>
+      <button class="btn btn-secondary" onclick="downloadReceipt()">💾 Download Receipt</button>
+    </div>
+  </div>
+
+  <script>
+    const TEMPO_CHAIN_ID = '0xA5BF'; // 42431
+    const TEMPO_RPC = 'https://rpc.moderato.tempo.xyz';
+    const POLL_INTERVAL = 3000; // Check for payment every 3 seconds
+
+    let currentPaymentRequest = null;
+    let cydConnected = false;
+    let cydIP = null;
+    let pollingInterval = null;
+    let currentQRBase64 = null; // Store the base64 QR code image
+    
+    // Preset menu items (stored in localStorage)
+    let presetItems = [];
+    
+    // Shopping cart
+    let cartItems = [];
+    
+    // Saved receipts (stored in localStorage)
+    let savedReceipts = [];
+    
+    // Unique instance watermark - DO NOT REMOVE
+    const TEMPO_WATERMARK = {
+      creator: 'NifftySwiggle',
+      contact: '@pet_rescueNFT',
+      created: '2026-01-21',
+      instanceId: `TEMPO-POS-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      version: '1.0.0'
+    };
+    
+    // Initialize watermark
+    (function() {
+      const watermarkData = btoa(JSON.stringify(TEMPO_WATERMARK));
+      localStorage.setItem('tempo_watermark', watermarkData);
+      
+      // Console watermark
+      console.log('%c⚡ Tempo POS Terminal', 'color: #1e90ff; font-size: 24px; font-weight: bold;');
+      console.log('%c© 2026 NifftySwiggle (@pet_rescueNFT)', 'color: #00e0d3; font-size: 14px;');
+      console.log('%cInstance ID: ' + TEMPO_WATERMARK.instanceId, 'color: #666; font-size: 12px;');
+      console.log('%cUnauthorized use or distribution is prohibited and traceable.', 'color: #dc3545; font-size: 12px; font-weight: bold;');
+      
+      // Hidden tracking element
+      const tracker = document.createElement('div');
+      tracker.id = 'tempo-watermark-tracker';
+      tracker.style.display = 'none';
+      tracker.setAttribute('data-creator', 'NifftySwiggle');
+      tracker.setAttribute('data-instance', TEMPO_WATERMARK.instanceId);
+      tracker.setAttribute('data-timestamp', new Date().toISOString());
+      document.body.appendChild(tracker);
+      
+      // Log usage
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        console.log('%cDomain: ' + window.location.hostname + ' | Instance: ' + TEMPO_WATERMARK.instanceId, 'color: #ffc107;');
+      }
+    })();
+
+    // TIP-20 ABI
+    const TIP20_ABI = [
+      'function transfer(address to, uint256 amount) external returns (bool)',
+      'function transferWithMemo(address to, uint256 amount, bytes32 memo) external',
+      'function balanceOf(address account) external view returns (uint256)'
+    ];
+
+    // Load preset items from localStorage
+    function loadPresetItems() {
+      const saved = localStorage.getItem('tempo_pos_presets');
+      if (saved) {
+        presetItems = JSON.parse(saved);
+      } else {
+        // Default items
+        presetItems = [
+          { name: 'Coffee', price: 4.20 },
+          { name: 'Bagel', price: 3.50 },
+          { name: 'Sandwich', price: 8.99 },
+          { name: 'Soda', price: 2.50 }
+        ];
+        savePresetItems();
+      }
+      renderPresetButtons();
+    }
+    
+    // Watermark verification - DO NOT REMOVE
+    function verifyWatermark() {
+      const stored = localStorage.getItem('tempo_watermark');
+      if (!stored) {
+        console.warn('⚠️ Watermark missing - Unauthorized modification detected');
+        return false;
+      }
+      try {
+        const data = JSON.parse(atob(stored));
+        if (data.creator !== 'NifftySwiggle') {
+          console.error('❌ Invalid watermark detected');
+          return false;
+        }
+        return true;
+      } catch (e) {
+        console.error('❌ Watermark verification failed');
+        return false;
+      }
+    }
+    
+    // Periodic watermark check
+    setInterval(verifyWatermark, 60000); // Check every minute
+
+    // Update cart display
+    function updateCartDisplay() {
+      const container = document.getElementById('cartDisplay');
+      const amountInput = document.getElementById('amountInput');
+      const memoInput = document.getElementById('memoInput');
+      
+      if (cartItems.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No items added</p>';
+        amountInput.value = '';
+        memoInput.value = '';
+        return;
+      }
+      
+      // Calculate total
+      const total = cartItems.reduce((sum, item) => sum + item.price, 0);
+      amountInput.value = total.toFixed(2);
+      
+      // Create memo
+      const memo = cartItems.map(item => `${item.name} $${item.price.toFixed(2)}`).join(', ');
+      memoInput.value = memo;
+      
+      // Display cart items
+      container.innerHTML = cartItems.map((item, index) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 4px; margin-bottom: 4px;">
+          <span style="font-weight: 600;">${item.name}</span>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="color: var(--tempo-green); font-weight: 600;">$${item.price.toFixed(2)}</span>
+            <button onclick="removeFromCart(${index})" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">✕</button>
+          </div>
+        </div>
+      `).join('');
+      
+      // Add total row
+      container.innerHTML += `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 8px 4px 8px; margin-top: 8px; border-top: 2px solid #ddd;">
+          <span style="font-weight: 700; font-size: 1.1rem;">TOTAL:</span>
+          <span style="color: var(--tempo-blue); font-weight: 700; font-size: 1.2rem;">$${total.toFixed(2)}</span>
+        </div>
+      `;
+    }
+
+    // Add custom amount to cart
+    function addCustomAmountFromInput() {
+      const input = document.getElementById('customAmountInput');
+      const descInput = document.getElementById('customDescInput');
+      const amount = parseFloat(input.value);
+      const description = descInput.value.trim();
+      
+      if (!amount || amount <= 0) {
+        showAlert('Please enter a valid amount', 'warning');
+        return;
+      }
+      
+      cartItems.push({
+        name: description || 'Custom Amount',
+        price: amount
+      });
+      updateCartDisplay();
+      addLog(`➕ Added: ${description || 'Custom Amount'} - $${amount.toFixed(2)}`, 'success');
+      
+      // Clear inputs
+      input.value = '';
+      descInput.value = '';
+    }
+    
+    function addCustomAmount(amount) {
+      cartItems.push({
+        name: 'Custom Amount',
+        price: amount
+      });
+      updateCartDisplay();
+      addLog(`➕ Added: Custom Amount - $${amount.toFixed(2)}`, 'success');
+    }
+    
+    // Remove item from cart
+    function removeFromCart(index) {
+      const item = cartItems[index];
+      cartItems.splice(index, 1);
+      updateCartDisplay();
+      addLog(`➖ Removed: ${item.name} - $${item.price.toFixed(2)}`, 'info');
+    }
+    
+    // Clear entire cart
+    function clearCart() {
+      if (cartItems.length === 0) {
+        showAlert('Cart is already empty', 'info');
+        return;
+      }
+      
+      if (confirm(`Clear all ${cartItems.length} items from cart?`)) {
+        cartItems = [];
+        updateCartDisplay();
+        addLog('🗑️ Cart cleared', 'info');
+      }
+    }
+
+    // Save preset items to localStorage
+    function savePresetItems() {
+      localStorage.setItem('tempo_pos_presets', JSON.stringify(presetItems));
+    }
+    
+    // Load saved receipts from localStorage
+    function loadSavedReceipts() {
+      const saved = localStorage.getItem('tempo_pos_receipts');
+      if (saved) {
+        savedReceipts = JSON.parse(saved);
+        displaySavedReceipts();
+      }
+    }
+    
+    // Save receipt to localStorage
+    function saveReceiptToStorage(receiptData) {
+      // Check for duplicate transaction hash
+      const existingIndex = savedReceipts.findIndex(r => r.txHash === receiptData.txHash);
+      if (existingIndex !== -1) {
+        console.log('Duplicate transaction detected, not saving:', receiptData.txHash);
+        return; // Don't save duplicate
+      }
+      
+      savedReceipts.unshift(receiptData); // Add to beginning
+      // Keep only last 100 receipts
+      if (savedReceipts.length > 100) {
+        savedReceipts = savedReceipts.slice(0, 100);
+      }
+      localStorage.setItem('tempo_pos_receipts', JSON.stringify(savedReceipts));
+      displaySavedReceipts();
+    }
+    
+    // Display saved receipts in transaction log
+    function displaySavedReceipts() {
+      const logDiv = document.getElementById('transactionLog');
+      const placeholder = logDiv.querySelector('.alert');
+      if (placeholder) {
+        placeholder.remove();
+      }
+      
+      logDiv.innerHTML = '';
+      
+      if (savedReceipts.length === 0) {
+        logDiv.innerHTML = '<div class="alert alert-info">No transactions yet. Generate a payment QR to begin.</div>';
+        return;
+      }
+      
+      savedReceipts.forEach((receipt, index) => {
+        const receiptDiv = document.createElement('div');
+        receiptDiv.className = receipt.refunded ? 'log-item log-warning' : 'log-item log-success';
+        receiptDiv.style.cursor = 'pointer';
+        receiptDiv.style.borderLeft = receipt.refunded ? '4px solid #dc3545' : '4px solid #28a745';
+        receiptDiv.innerHTML = `
+          <strong>${receipt.date} ${receipt.time}</strong> - $${receipt.amount.toFixed(2)} ${receipt.memo}${receipt.refunded ? ' <span style="color:#dc3545;font-weight:600;">[REFUNDED]</span>' : ''}<br>
+          <small style="color:#666;">TX: ${receipt.txHash.substring(0, 20)}... | Items: ${receipt.itemCount}</small>
+        `;
+        receiptDiv.onclick = () => viewReceiptDetails(index);
+        logDiv.appendChild(receiptDiv);
+      });
+    }
+    
+    // Load saved receipts from localStorage
+    function loadSavedReceipts() {
+      const saved = localStorage.getItem('tempo_pos_receipts');
+      if (saved) {
+        savedReceipts = JSON.parse(saved);
+        displaySavedReceipts();
+      }
+    }
+
+    // Render preset buttons
+    function renderPresetButtons() {
+      const container = document.getElementById('presetButtons');
+      if (presetItems.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px; grid-column: 1/-1;">No items yet. Click "Manage Items" to add.</p>';
+        return;
+      }
+      
+      container.innerHTML = presetItems.map((item, index) => `
+        <button class="preset-item-btn" onclick="usePresetItem(${index})">
+          <span class="item-name">${item.name}</span>
+          <span class="item-price">$${item.price.toFixed(2)}</span>
+        </button>
+      `).join('');
+    }
+
+    // Use preset item (add to cart)
+    function usePresetItem(index) {
+      const item = presetItems[index];
+      cartItems.push({
+        name: item.name,
+        price: item.price
+      });
+      updateCartDisplay();
+      addLog(`➕ Added: ${item.name} - $${item.price.toFixed(2)}`, 'success');
+    }
+
+    // Toggle preset manager
+    function togglePresetManager() {
+      const manager = document.getElementById('presetManager');
+      if (manager.style.display === 'none') {
+        manager.style.display = 'block';
+        renderPresetItemsList();
+      } else {
+        manager.style.display = 'none';
+      }
+    }
+
+    // Render preset items list for editing
+    function renderPresetItemsList() {
+      const container = document.getElementById('presetItemsList');
+      if (presetItems.length === 0) {
+        container.innerHTML = '<p style="color: #999; text-align: center; padding: 12px;">No items yet. Click "Add New Item" below.</p>';
+        return;
+      }
+      
+      container.innerHTML = presetItems.map((item, index) => `
+        <div class="preset-edit-item">
+          <input type="text" value="${item.name}" onchange="updatePresetItem(${index}, 'name', this.value)" placeholder="Item name">
+          <input type="number" value="${item.price}" onchange="updatePresetItem(${index}, 'price', this.value)" step="0.01" min="0.01" placeholder="Price">
+          <button onclick="deletePresetItem(${index})">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    // Update preset item
+    function updatePresetItem(index, field, value) {
+      if (field === 'price') {
+        presetItems[index][field] = parseFloat(value) || 0.01;
+      } else {
+        presetItems[index][field] = value;
+      }
+      savePresetItems();
+      renderPresetButtons();
+      renderPresetItemsList();
+      addLog(`✏️ Updated: ${presetItems[index].name}`, 'info');
+      updateCartDisplay();
+    }
+
+    // Delete preset item
+    function deletePresetItem(index) {
+      const item = presetItems[index];
+      if (confirm(`Delete ${item.name}?`)) {
+        presetItems.splice(index, 1);
+        savePresetItems();
+        renderPresetButtons();
+        renderPresetItemsList();
+        addLog(`🗑️ Deleted: ${item.name}`, 'info');
+      }
+    }
+
+    // Add new preset item
+    function addNewPresetItem() {
+      presetItems.push({ name: 'New Item', price: 5.00 });
+      savePresetItems();
+      renderPresetButtons();
+      renderPresetItemsList();
+    }
+
+
+
+    async function connectCYD() {
+      const ip = document.getElementById('cydIP').value.trim();
+      if (!ip) {
+        alert('Please enter CYD IP address');
+        return;
+      }
+
+      try {
+        // Test connection to CYD
+        const response = await fetch(`http://${ip}/ping`, { 
+          method: 'GET',
+          mode: 'no-cors' // Allow CORS for local devices
+        });
+        
+        cydIP = ip;
+        cydConnected = true;
+        document.getElementById('cydStatus').className = 'status-badge status-connected';
+        document.getElementById('cydStatus').textContent = `CYD Connected (${ip})`;
+        
+        addLog('✅ Connected to CYD display', 'success');
+      } catch (error) {
+        addLog(`⚠️ Could not verify CYD connection. Will attempt to send anyway.`, 'warning');
+        // Still set as connected so user can try
+        cydIP = ip;
+        cydConnected = true;
+        document.getElementById('cydStatus').className = 'status-badge status-connected';
+        document.getElementById('cydStatus').textContent = `CYD Set (${ip})`;
+      }
+    }
+
+    async function generatePaymentQR() {
+      const amount = parseFloat(document.getElementById('amountInput').value);
+      const tokenAddress = document.getElementById('tokenSelect').value;
+      const memo = document.getElementById('memoInput').value || 'POS Payment';
+      const merchantAddress = document.getElementById('merchantAddress').value;
+
+      if (!amount || amount <= 0) {
+        showAlert('Please add items to cart before generating QR', 'warning');
+        return;
+      }
+
+      // Clear previous QR code and base64 data
+      currentQRBase64 = null;
+      const qrContainer = document.getElementById('qrCanvas').parentElement;
+      const existingQR = qrContainer.querySelector('.qrcode-container');
+      if (existingQR) {
+        existingQR.remove();
+        addLog('🔄 Cleared previous QR code', 'info');
+      }
+
+      // Create payment request object with fresh data
+      currentPaymentRequest = {
+        amount: amount,
+        tokenAddress: tokenAddress,
+        merchantAddress: merchantAddress,
+        memo: memo,
+        timestamp: Date.now(),
+        amountUnits: ethers.utils.parseUnits(amount.toString(), 6).toString(),
+        cartItems: [...cartItems] // Save cart items for receipt
+      };
+
+      // Create MetaMask-specific deep link to force opening in MetaMask app
+      // Using MetaMask's app link format instead of generic ethereum: scheme
+      const qrData = `https://metamask.app.link/send/${tokenAddress}@42431/transfer?address=${merchantAddress}&uint256=${currentPaymentRequest.amountUnits}`;
+      
+      // Debug: Log QR data to console
+      console.log('QR Code Data (MetaMask Deep Link):', qrData);
+      console.log('Amount:', amount);
+      console.log('Amount in units (6 decimals):', currentPaymentRequest.amountUnits);
+      console.log('This QR will specifically open in MetaMask app');
+      addLog(`🔍 QR Data (MetaMask deep link): ${qrData.substring(0, 60)}...`, 'info');
+
+      // Generate QR code
+      const canvas = document.getElementById('qrCanvas');
+      
+      // Create container for QR
+      const qrDiv = document.createElement('div');
+      qrDiv.className = 'qrcode-container';
+      qrDiv.style.display = 'inline-block';
+      
+      try {
+        // Use QRCode constructor with lower error correction for more data capacity
+        new QRCode(qrDiv, {
+          text: qrData,
+          width: 300,
+          height: 300,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.L
+        });
+
+        canvas.style.display = 'none';
+        document.getElementById('qrPlaceholder').style.display = 'none';
+        qrContainer.appendChild(qrDiv);
+        document.getElementById('sendCYDBtn').style.display = 'block';
+
+        // Convert QR code to base64 image
+        setTimeout(() => {
+          const qrCanvas = qrDiv.querySelector('canvas');
+          if (qrCanvas) {
+            currentQRBase64 = qrCanvas.toDataURL('image/png');
+            console.log('QR Code converted to base64');
+            addLog(`🖼️ QR Code image ready (${Math.round(currentQRBase64.length / 1024)}KB)`, 'info');
+          }
+        }, 100); // Small delay to ensure QR is rendered
+
+        showAlert(`✅ QR Code generated for $${amount} payment`, 'success');
+        addLog(`📱 Generated payment QR: $${amount} ${memo}`, 'success');
+
+        // Start monitoring for payment
+        startPaymentMonitoring();
+
+      } catch (error) {
+        showAlert('Error generating QR code: ' + error.message, 'error');
+      }
+    }
+
+    async function sendQRToCYD() {
+      if (!cydConnected || !cydIP) {
+        showAlert('Please connect to CYD display first', 'warning');
+        return;
+      }
+
+      if (!currentPaymentRequest) {
+        showAlert('Please generate a QR code first', 'warning');
+        return;
+      }
+
+      if (!currentQRBase64) {
+        showAlert('QR code image not ready yet, please try again', 'warning');
+        return;
+      }
+
+      try {
+        console.log('Sending QR image to CYD (base64 length:', currentQRBase64.length, ')');
+
+        // Send base64 image to CYD via HTTP POST
+        const response = await fetch(`http://${cydIP}/display`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            type: 'qr_image',
+            image: currentQRBase64,
+            amount: currentPaymentRequest.amount,
+            memo: currentPaymentRequest.memo
+          })
+        });
+
+        if (response.ok) {
+          showAlert('✅ QR Code image sent to CYD display!', 'success');
+          addLog(`📤 Sent QR image to CYD (${cydIP}) - ${Math.round(currentQRBase64.length / 1024)}KB`, 'success');
+        } else {
+          throw new Error('Failed to send to CYD');
+        }
+      } catch (error) {
+        // Check if it's a CORS error
+        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+          showAlert(`⚠️ CORS Error: Your CYD firmware needs to fix duplicate CORS headers. See console for details.`, 'error');
+          addLog('❌ CYD CORS Error: Duplicate Access-Control-Allow-Origin headers detected', 'error');
+          console.error('\n=== CYD CORS FIX NEEDED ===');
+          console.error('Your CYD ESP32 is sending duplicate CORS headers.');
+          console.error('In your ESP32 code, find where you set CORS headers and ensure it\'s only set ONCE:');
+          console.error('\nCorrect (set once):\n  server.sendHeader("Access-Control-Allow-Origin", "*");');
+          console.error('\nIncorrect (duplicate - causes error):\n  server.sendHeader("Access-Control-Allow-Origin", "*");\n  server.sendHeader("Access-Control-Allow-Origin", "*");');
+          console.error('\nCheck your /display endpoint handler and remove duplicate header calls.');
+          console.error('===========================\n');
+        } else {
+          showAlert(`⚠️ Could not send to CYD: ${error.message}. Make sure CYD firmware supports /display endpoint`, 'warning');
+          addLog(`⚠️ CYD send failed: ${error.message}`, 'error');
+        }
+      }
+    }
+
+    async function startPaymentMonitoring() {
+      // Clear any existing polling
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+      }
+
+      const statusDiv = document.getElementById('paymentStatus');
+      statusDiv.innerHTML = '<div class="alert alert-info">⏳ Waiting for payment...</div>';
+
+      // Monitor for incoming transactions
+      pollingInterval = setInterval(async () => {
+        try {
+          await checkForPayment();
+        } catch (error) {
+          console.error('Payment check error:', error);
+        }
+      }, POLL_INTERVAL);
+    }
+
+    async function checkForPayment() {
+      if (!currentPaymentRequest) return;
+
+      const provider = new ethers.providers.JsonRpcProvider(TEMPO_RPC);
+      const merchantAddress = currentPaymentRequest.merchantAddress;
+      const tokenAddress = currentPaymentRequest.tokenAddress;
+
+      // Get recent transfer events for this token
+      const contract = new ethers.Contract(tokenAddress, TIP20_ABI, provider);
+      const currentBlock = await provider.getBlockNumber();
+      const fromBlock = currentBlock - 20; // Check last 20 blocks
+
+      try {
+        const transferEvents = await provider.getLogs({
+          address: tokenAddress,
+          topics: [
+            ethers.utils.id('Transfer(address,address,uint256)'),
+            null, // from any address
+            ethers.utils.hexZeroPad(merchantAddress, 32) // to merchant
+          ],
+          fromBlock: fromBlock,
+          toBlock: 'latest'
+        });
+
+        // Check if any transfer matches our payment request
+        for (const event of transferEvents) {
+          const receipt = await provider.getTransactionReceipt(event.transactionHash);
+          const tx = await provider.getTransaction(event.transactionHash);
+          
+          // Parse transfer amount
+          const amount = ethers.BigNumber.from(event.data);
+          const expectedAmount = ethers.BigNumber.from(currentPaymentRequest.amountUnits);
+
+          if (amount.eq(expectedAmount)) {
+            // Payment received!
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+
+            await handlePaymentReceived(event.transactionHash, tx);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error checking for payment:', error);
+      }
+    }
+
+    async function handlePaymentReceived(txHash, transaction) {
+      const statusDiv = document.getElementById('paymentStatus');
+      statusDiv.innerHTML = `
+        <div class="alert alert-success">
+          <strong>✅ Payment Received!</strong><br>
+          <a href="https://explore.tempo.xyz/tx/${txHash}" target="_blank" style="color: #155724; font-weight: 600;">
+            View Transaction
+          </a>
+        </div>
+      `;
+
+      addLog(`✅ Payment confirmed: $${currentPaymentRequest.amount} - ${currentPaymentRequest.memo}`, 'success');
+
+      // Notify CYD of successful payment
+      if (cydConnected && cydIP) {
+        try {
+          await fetch(`http://${cydIP}/payment-success`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ success: true })
+          });
+        } catch (error) {
+          console.log('Could not notify CYD:', error);
+        }
+      }
+
+      // Generate receipt
+      generateReceipt(txHash, transaction);
+    }
+
+    function generateReceipt(txHash, transaction) {
+      const receiptCard = document.getElementById('receiptCard');
+      const receiptPreview = document.getElementById('receiptPreview');
+      
+      const now = new Date();
+      const receiptHTML = `
+        <h3>TAX RECEIPT / INVOICE</h3>
+        <div style="text-align: center; margin-bottom: 20px; color: #666;">
+          <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a> POS Terminal<br>
+          Tempo Blockchain Payment
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-line">
+          <span>Date:</span>
+          <span>${now.toLocaleDateString()}</span>
+        </div>
+        <div class="receipt-line">
+          <span>Time:</span>
+          <span>${now.toLocaleTimeString()}</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        ${currentPaymentRequest.cartItems ? currentPaymentRequest.cartItems.map(item => `
+          <div class="receipt-line">
+            <span>${item.name}</span>
+            <span>$${item.price.toFixed(2)}</span>
+          </div>
+        `).join('') : `
+          <div class="receipt-line">
+            <span>Description:</span>
+            <span>${currentPaymentRequest.memo}</span>
+          </div>
+        `}
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-line" style="font-weight: 700; font-size: 1.1rem;">
+          <span>TOTAL:</span>
+          <span>$${currentPaymentRequest.amount.toFixed(2)} USD</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div style="font-size: 0.85rem; color: #666; margin-top: 12px;">
+          <strong>Transaction Details:</strong><br>
+          TX Hash: ${txHash}<br>
+          Merchant: ${currentPaymentRequest.merchantAddress}<br>
+          Token: ${getTokenName(currentPaymentRequest.tokenAddress)}<br>
+          Chain ID: 42431 (Tempo Testnet)<br>
+          Block: ${transaction.blockNumber || 'Pending'}
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; padding-top: 12px; border-top: 1px solid #ccc; font-size: 0.8rem; color: #999;">
+          Powered by Tempo Blockchain<br>
+          <a href="https://x.com/pet_rescueNFT" target="_blank">@NifftySwiggle</a>
+        </div>
+      `;
+
+      receiptPreview.innerHTML = receiptHTML;
+      receiptCard.style.display = 'block';
+      receiptCard.scrollIntoView({ behavior: 'smooth' });
+      
+      // Save receipt to storage
+      const receiptData = {
+        date: now.toLocaleDateString(),
+        time: now.toLocaleTimeString(),
+        amount: currentPaymentRequest.amount,
+        memo: currentPaymentRequest.memo,
+        txHash: txHash,
+        merchantAddress: currentPaymentRequest.merchantAddress,
+        tokenAddress: currentPaymentRequest.tokenAddress,
+        tokenName: getTokenName(currentPaymentRequest.tokenAddress),
+        blockNumber: transaction.blockNumber || 'Pending',
+        cartItems: currentPaymentRequest.cartItems || [],
+        itemCount: currentPaymentRequest.cartItems ? currentPaymentRequest.cartItems.length : 0,
+        timestamp: now.getTime(),
+        receiptHTML: receiptHTML
+      };
+      saveReceiptToStorage(receiptData);
+    }
+
+    function downloadReceipt() {
+      const receiptContent = document.getElementById('receiptPreview').innerText;
+      const blob = new Blob([receiptContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `receipt_${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+    
+    // View receipt details from saved receipts
+    function viewReceiptDetails(index) {
+      const receipt = savedReceipts[index];
+      const receiptCard = document.getElementById('receiptCard');
+      const receiptPreview = document.getElementById('receiptPreview');
+      
+      receiptPreview.innerHTML = receipt.receiptHTML;
+      receiptCard.style.display = 'block';
+      receiptCard.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Download all receipts as text file
+    function downloadAllReceipts() {
+      if (savedReceipts.length === 0) {
+        alert('No receipts to download.');
+        return;
+      }
+      
+      let allReceiptsText = 'TEMPO POS - ALL RECEIPTS\n';
+      allReceiptsText += '='.repeat(60) + '\n\n';
+      
+      let totalSales = 0;
+      let totalRefunds = 0;
+      
+      savedReceipts.forEach((receipt, index) => {
+        allReceiptsText += `RECEIPT #${savedReceipts.length - index}`;
+        if (receipt.refunded) {
+          allReceiptsText += ' [REFUNDED]';
+        }
+        allReceiptsText += '\n';
+        allReceiptsText += '-'.repeat(60) + '\n';
+        allReceiptsText += `Date: ${receipt.date} ${receipt.time}\n`;
+        allReceiptsText += `Amount: $${receipt.amount.toFixed(2)} USD\n`;
+        allReceiptsText += `Status: ${receipt.refunded ? 'REFUNDED' : 'COMPLETED'}\n`;
+        allReceiptsText += `Description: ${receipt.memo}\n`;
+        allReceiptsText += `Transaction: ${receipt.txHash}\n`;
+        allReceiptsText += `Token: ${receipt.tokenName}\n`;
+        allReceiptsText += `Block: ${receipt.blockNumber}\n`;
+        
+        if (receipt.cartItems && receipt.cartItems.length > 0) {
+          allReceiptsText += '\nItems:\n';
+          receipt.cartItems.forEach(item => {
+            allReceiptsText += `  ${item.name} - $${item.price.toFixed(2)}\n`;
+          });
+        }
+        
+        if (receipt.refunded) {
+          allReceiptsText += `\nREFUND INFO:\n`;
+          allReceiptsText += `  Refund TX: ${receipt.refundTxHash || 'N/A'}\n`;
+          allReceiptsText += `  Refund Date: ${receipt.refundDate || 'N/A'}\n`;
+          totalRefunds += receipt.amount;
+        } else {
+          totalSales += receipt.amount;
+        }
+        
+        allReceiptsText += '\n' + '='.repeat(60) + '\n\n';
+      });
+      
+      // Add summary
+      const grossSales = savedReceipts.reduce((sum, r) => sum + r.amount, 0);
+      allReceiptsText += 'SUMMARY\n';
+      allReceiptsText += '='.repeat(60) + '\n';
+      allReceiptsText += `Total Transactions: ${savedReceipts.length}\n`;
+      allReceiptsText += `Gross Sales: $${grossSales.toFixed(2)}\n`;
+      allReceiptsText += `Total Refunds: $${totalRefunds.toFixed(2)} (${savedReceipts.filter(r => r.refunded).length} refunded)\n`;
+      allReceiptsText += `NET SALES: $${totalSales.toFixed(2)}\n`;
+      
+      const blob = new Blob([allReceiptsText], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `all_receipts_${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      addLog(`📥 Downloaded ${savedReceipts.length} receipts (Net: $${totalSales.toFixed(2)})`, 'success');
+    }
+    
+    // Export to Excel (CSV format)
+    function exportToExcel() {
+      if (savedReceipts.length === 0) {
+        alert('No receipts to export.');
+        return;
+      }
+      
+      // Create CSV header with refund column
+      let csv = 'Date,Time,Amount (USD),Status,Description,Transaction Hash,Token,Block Number,Items,Item Count,Merchant Address,Refund TX,Refund Date\n';
+      
+      // Add each receipt as a row
+      let totalSales = 0;
+      let totalRefunds = 0;
+      
+      savedReceipts.forEach(receipt => {
+        const itemsList = receipt.cartItems && receipt.cartItems.length > 0
+          ? receipt.cartItems.map(item => `${item.name} ($${item.price})`).join('; ')
+          : receipt.memo;
+        
+        const status = receipt.refunded ? 'REFUNDED' : 'COMPLETED';
+        const refundTx = receipt.refunded && receipt.refundTxHash ? receipt.refundTxHash : '';
+        const refundDate = receipt.refunded && receipt.refundDate ? receipt.refundDate : '';
+        
+        csv += `"${receipt.date}","${receipt.time}",${receipt.amount.toFixed(2)},"${status}","${receipt.memo}","${receipt.txHash}","${receipt.tokenName}",${receipt.blockNumber},"${itemsList}",${receipt.itemCount},"${receipt.merchantAddress}","${refundTx}","${refundDate}"\n`;
+        
+        if (receipt.refunded) {
+          totalRefunds += receipt.amount;
+        } else {
+          totalSales += receipt.amount;
+        }
+      });
+      
+      // Create summary rows
+      const grossSales = savedReceipts.reduce((sum, r) => sum + r.amount, 0);
+      const netSales = totalSales;
+      
+      csv += `\n"SUMMARY","","","","","","","","","","","",""\n`;
+      csv += `"Total Transactions","",${grossSales.toFixed(2)},"","${savedReceipts.length} transactions","","","","","","","",""\n`;
+      csv += `"Total Refunds","",${totalRefunds.toFixed(2)},"","${savedReceipts.filter(r => r.refunded).length} refunded","","","","","","","",""\n`;
+      csv += `"NET SALES","",${netSales.toFixed(2)},"","After refunds","","","","","","","",""\n`;
+      
+      // Download as CSV
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `tempo_pos_sales_${Date.now()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      addLog(`📊 Exported ${savedReceipts.length} receipts (Net Sales: $${netSales.toFixed(2)}, Refunds: $${totalRefunds.toFixed(2)})`, 'success');
+    }
+    
+    // Clear all receipts
+    function clearAllReceipts() {
+      if (savedReceipts.length === 0) {
+        alert('No receipts to clear.');
+        return;
+      }
+      
+      const totalAmount = savedReceipts.reduce((sum, r) => sum + r.amount, 0);
+      const confirmMsg = `⚠️ WARNING: You are about to permanently delete ALL ${savedReceipts.length} receipts!\n\nTotal Sales: $${totalAmount.toFixed(2)}\n\nThis action CANNOT be undone.\n\nAre you absolutely sure you want to continue?`;
+      
+      if (confirm(confirmMsg)) {
+        // Double confirmation for safety
+        if (confirm('⚠️ FINAL CONFIRMATION: Delete all receipts permanently?')) {
+          savedReceipts = [];
+          localStorage.removeItem('tempo_pos_receipts');
+          displaySavedReceipts();
+          addLog('🗑️ All receipts cleared', 'warning');
+          alert('✅ All receipts have been cleared.');
+        } else {
+          addLog('❌ Receipt deletion cancelled', 'info');
+        }
+      } else {
+        addLog('❌ Receipt deletion cancelled', 'info');
+      }
+    }
+
+    function getTokenName(address) {
+      const tokens = {
+        '0x20C0000000000000000000000000000000000001': 'AlphaUSD',
+        '0x20C0000000000000000000000000000000000002': 'BetaUSD',
+        '0x20C0000000000000000000000000000000000003': 'ThetaUSD',
+        '0x20C0000000000000000000000000000000000004': 'PathUSD'
+      };
+      return tokens[address] || 'Unknown Token';
+    }
+    
+    // Open refund panel
+    function openRefundPanel() {
+      document.getElementById('refundSidebar').classList.add('open');
+      document.getElementById('refundOverlay').classList.add('active');
+      displayRefundList();
+      addLog('🔄 Opened refund management panel', 'info');
+    }
+    
+    // Close refund panel
+    function closeRefundPanel() {
+      document.getElementById('refundSidebar').classList.remove('open');
+      document.getElementById('refundOverlay').classList.remove('active');
+    }
+    
+    // Display all transactions in refund panel
+    function displayRefundList() {
+      const refundList = document.getElementById('refundList');
+      
+      if (savedReceipts.length === 0) {
+        refundList.innerHTML = '<div class="alert alert-info">No transactions to refund.</div>';
+        return;
+      }
+      
+      refundList.innerHTML = savedReceipts.map((receipt, index) => `
+        <div class="refund-item ${receipt.refunded ? 'refunded' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--tempo-blue);">Receipt #${savedReceipts.length - index}</strong>
+              ${receipt.refunded ? '<span style="color: #dc3545; font-weight: 600; margin-left: 8px;">[REFUNDED]</span>' : ''}
+            </div>
+            <strong style="font-size: 1.2rem; color: var(--tempo-green);">$${receipt.amount.toFixed(2)}</strong>
+          </div>
+          <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <div><strong>Date:</strong> ${receipt.date} ${receipt.time}</div>
+            <div><strong>Description:</strong> ${receipt.memo}</div>
+            <div><strong>TX:</strong> ${receipt.txHash.substring(0, 30)}...</div>
+            ${receipt.cartItems && receipt.cartItems.length > 0 ? `
+              <div style="margin-top: 8px;"><strong>Items:</strong></div>
+              ${receipt.cartItems.map(item => `<div style="padding-left: 12px;">• ${item.name} - $${item.price.toFixed(2)}</div>`).join('')}
+            ` : ''}
+            ${receipt.refunded ? `
+              <div style="margin-top: 8px; color: #dc3545;">
+                <strong>Refund TX:</strong> ${receipt.refundTxHash ? receipt.refundTxHash.substring(0, 30) + '...' : 'N/A'}<br>
+                <strong>Refunded:</strong> ${receipt.refundDate || 'N/A'}
+              </div>
+            ` : ''}
+          </div>
+          ${!receipt.refunded ? `
+            <button onclick="processRefund(${index})" class="btn" style="width: 100%; background: #dc3545; color: white; font-weight: 600;">
+              🔄 Process Refund
+            </button>
+          ` : `
+            <div style="text-align: center; padding: 8px; background: rgba(220, 53, 69, 0.1); border-radius: 6px; color: #dc3545; font-weight: 600;">
+              ✓ Already Refunded
+            </div>
+          `}
+        </div>
+      `).join('');
+    }
+    
+    // Process refund
+    async function processRefund(index) {
+      const receipt = savedReceipts[index];
+      
+      if (receipt.refunded) {
+        alert('This transaction has already been refunded.');
+        return;
+      }
+      
+      const confirmMsg = `Process refund for Receipt #${savedReceipts.length - index}?\n\nAmount: $${receipt.amount.toFixed(2)}\nDate: ${receipt.date} ${receipt.time}\nDescription: ${receipt.memo}\n\nThis will send ${receipt.amount.toFixed(2)} ${receipt.tokenName} back to the customer.`;
+      
+      if (!confirm(confirmMsg)) {
+        return;
+      }
+      
+      // Check if wallet is connected
+      if (!window.ethereum) {
+        alert('MetaMask not found. Please install MetaMask to process refunds.');
+        return;
+      }
+      
+      try {
+        addLog(`🔄 Processing refund for Receipt #${savedReceipts.length - index}...`, 'warning');
+        
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+        const signer = provider.getSigner();
+        
+        // Get original transaction to find sender
+        const originalTx = await provider.getTransaction(receipt.txHash);
+        const customerAddress = originalTx.from;
+        
+        // Create refund transaction
+        const contract = new ethers.Contract(receipt.tokenAddress, TIP20_ABI, signer);
+        const amountUnits = ethers.utils.parseUnits(receipt.amount.toString(), 6);
+        
+        const refundTx = await contract.transfer(customerAddress, amountUnits);
+        addLog(`💸 Refund transaction sent, waiting for confirmation...`, 'info');
+        
+        const refundReceipt = await refundTx.wait();
+        
+        // Update receipt record
+        savedReceipts[index].refunded = true;
+        savedReceipts[index].refundTxHash = refundTx.hash;
+        savedReceipts[index].refundDate = new Date().toLocaleString();
+        savedReceipts[index].customerAddress = customerAddress;
+        
+        localStorage.setItem('tempo_pos_receipts', JSON.stringify(savedReceipts));
+        displaySavedReceipts();
+        displayRefundList();
+        
+        // Generate refund confirmation
+        generateRefundReceipt(receipt, refundTx.hash, customerAddress);
+        
+        addLog(`✅ Refund processed successfully! TX: ${refundTx.hash.substring(0, 20)}...`, 'success');
+        alert(`✅ Refund Successful!\n\nAmount: $${receipt.amount.toFixed(2)}\nRefund TX: ${refundTx.hash}\n\nA refund receipt has been generated.`);
+        
+      } catch (error) {
+        console.error('Refund error:', error);
+        addLog(`❌ Refund failed: ${error.message}`, 'error');
+        alert(`Refund failed: ${error.message}`);
+      }
+    }
+    
+    // Generate refund receipt
+    function generateRefundReceipt(originalReceipt, refundTxHash, customerAddress) {
+      const receiptCard = document.getElementById('receiptCard');
+      const receiptPreview = document.getElementById('receiptPreview');
+      
+      const now = new Date();
+      const refundHTML = `
+        <h3 style="color: #dc3545;">REFUND RECEIPT</h3>
+        <div style="text-align: center; margin-bottom: 20px; color: #666;">
+          <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a> POS Terminal<br>
+          Tempo Blockchain Refund
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-line">
+          <span>Refund Date:</span>
+          <span>${now.toLocaleDateString()}</span>
+        </div>
+        <div class="receipt-line">
+          <span>Refund Time:</span>
+          <span>${now.toLocaleTimeString()}</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div style="background: #fff3cd; padding: 12px; border-radius: 6px; margin: 12px 0;">
+          <strong style="color: #856404;">ORIGINAL TRANSACTION</strong><br>
+          <div class="receipt-line" style="margin-top: 8px;">
+            <span>Date:</span>
+            <span>${originalReceipt.date}</span>
+          </div>
+          <div class="receipt-line">
+            <span>Time:</span>
+            <span>${originalReceipt.time}</span>
+          </div>
+          <div class="receipt-line">
+            <span>TX Hash:</span>
+            <span style="font-size: 0.8em;">${originalReceipt.txHash.substring(0, 20)}...</span>
+          </div>
+        </div>
+        
+        ${originalReceipt.cartItems && originalReceipt.cartItems.length > 0 ? originalReceipt.cartItems.map(item => `
+          <div class="receipt-line">
+            <span>${item.name}</span>
+            <span>$${item.price.toFixed(2)}</span>
+          </div>
+        `).join('') : `
+          <div class="receipt-line">
+            <span>Description:</span>
+            <span>${originalReceipt.memo}</span>
+          </div>
+        `}
+        
+        <div class="receipt-divider"></div>
+        
+        <div class="receipt-line" style="font-weight: 700; font-size: 1.1rem; color: #dc3545;">
+          <span>REFUND AMOUNT:</span>
+          <span>$${originalReceipt.amount.toFixed(2)} USD</span>
+        </div>
+        
+        <div class="receipt-divider"></div>
+        
+        <div style="font-size: 0.85rem; color: #666; margin-top: 12px;">
+          <strong>Refund Details:</strong><br>
+          Refund TX Hash: ${refundTxHash}<br>
+          Customer Address: ${customerAddress}<br>
+          Token: ${originalReceipt.tokenName}<br>
+          Chain ID: 42431 (Tempo Testnet)
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px; padding-top: 12px; border-top: 1px solid #ccc; font-size: 0.8rem; color: #999;">
+          Powered by Tempo Blockchain<br>
+          <a href="https://x.com/pet_rescueNFT" target="_blank">@NifftySwiggle</a>
+        </div>
+      `;
+      
+      receiptPreview.innerHTML = refundHTML;
+      receiptCard.style.display = 'block';
+      receiptCard.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // Show info modal
+    function showInfoModal() {
+      document.getElementById('infoModal').style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    // Close info modal
+    function closeInfoModal() {
+      document.getElementById('infoModal').style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Toggle merchant address lock
+    function toggleMerchantLock() {
+      const input = document.getElementById('merchantAddress');
+      const btn = document.getElementById('lockBtn');
+      
+      if (input.readOnly) {
+        // Unlock
+        input.readOnly = false;
+        input.style.background = '#fff3cd';
+        input.style.borderColor = '#ffc107';
+        btn.innerHTML = '🔓 Unlocked';
+        btn.style.background = '#ffc107';
+        btn.style.color = '#000';
+        btn.title = 'Click to lock';
+        addLog('🔓 Merchant address unlocked for editing', 'warning');
+      } else {
+        // Lock
+        const address = input.value.trim();
+        if (!address || !address.startsWith('0x') || address.length !== 42) {
+          alert('Please enter a valid Ethereum address (0x... with 42 characters)');
+          return;
+        }
+        input.readOnly = true;
+        input.style.background = '';
+        input.style.borderColor = '';
+        btn.innerHTML = '🔒 Locked';
+        btn.style.background = '#28a745';
+        btn.style.color = 'white';
+        btn.title = 'Click to unlock and edit';
+        addLog('🔒 Merchant address locked', 'success');
+      }
+    }
+
+    function addLog(message, type = 'info') {
+      const logDiv = document.getElementById('transactionLog');
+      const logItem = document.createElement('div');
+      logItem.className = `log-item ${type}`;
+      logItem.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+      
+      // Remove placeholder if exists
+      const placeholder = logDiv.querySelector('.alert');
+      if (placeholder) {
+        placeholder.remove();
+      }
+      
+      logDiv.insertBefore(logItem, logDiv.firstChild);
+      
+      // Keep only last 20 logs
+      while (logDiv.children.length > 20) {
+        logDiv.removeChild(logDiv.lastChild);
+      }
+    }
+
+    function showAlert(message, type) {
+      const alertDiv = document.getElementById('qrAlert');
+      const alertClass = type === 'success' ? 'alert-success' : type === 'warning' ? 'alert-warning' : 'alert-info';
+      alertDiv.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
+      
+      setTimeout(() => {
+        alertDiv.innerHTML = '';
+      }, 5000);
+    }
+
+    // Initialize
+    addLog('💳 POS Terminal initialized', 'info');
+    loadPresetItems();
+    loadSavedReceipts();
+    
+    // Theme toggle functionality
+    function toggleTheme() {
+      const html = document.documentElement;
+      const currentTheme = html.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeText(newTheme);
+    }
+    
+    function updateThemeText(theme) {
+      const text = document.getElementById('theme-text');
+      text.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+    
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeText(savedTheme);
+    });
+  </script>
+  <footer style="text-align:center;padding:24px;color:#888;font-size:0.9em;background:var(--card-bg);">
+    © 2026 Tempo Developer Hub. Created by <a href="https://x.com/pet_rescueNFT" target="_blank" style="color:#1e90ff;font-weight:600;text-decoration:none;">NifftySwiggle</a>. All rights reserved.
+    <span id="watermark-display" style="display:block;margin-top:8px;font-size:0.75em;color:#999;font-family:monospace;"></span>
+    <script>
+      // Display instance ID in footer
+      document.getElementById('watermark-display').textContent = 'Instance: ' + TEMPO_WATERMARK.instanceId;
+    </script>
+  </footer>
+</body>
+</html>
