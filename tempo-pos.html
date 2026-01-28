@@ -786,7 +786,7 @@
           <li><strong>Auto-Confirm:</strong> System monitors blockchain and confirms payment</li>
           <li><strong>Receipts:</strong> Automatic receipt generation, export to Excel/CSV</li>
           <li><strong>Refunds:</strong> Process blockchain refunds through the refund panel</li>
-          <li><strong>Hardware:</strong> Optional CYD ESP32 display for customer-facing screen</li>
+          <li><strong>Hardware:</strong> Optional CYD ESP32 display (sends payment data, generates QR locally)</li>
         </ul>
       </div>
       
@@ -797,7 +797,7 @@
           <li>Connected to Tempo Testnet (Chain ID: 42431)</li>
           <li>Merchant wallet address configured</li>
           <li>USDC/USDT token contract addresses</li>
-          <li>Optional: CYD ESP32 display hardware</li>
+          <li>Optional: CYD ESP32 display with QRCode library firmware</li>
         </ul>
       </div>
       
@@ -970,8 +970,8 @@
 
         <div id="paymentStatus" style="margin-top: 16px; text-align: center;"></div>
 
-        <button class="btn btn-secondary" onclick="sendQRToCYD()" id="sendCYDBtn" style="display: none;">
-          📤 Send to CYD Display
+        <button class="btn btn-secondary" onclick="sendQRToCYD()" id="sendCYDBtn" style="display: none;" title="Sends payment data to CYD - QR generated on device">
+          📤 Send to CYD
         </button>
       </div>
     </div>
@@ -1494,31 +1494,35 @@
         return;
       }
 
-      if (!currentQRBase64) {
-        showAlert('QR code image not ready yet, please try again', 'warning');
-        return;
-      }
-
       try {
-        console.log('Sending QR image to CYD (base64 length:', currentQRBase64.length, ')');
+        // Send compact payment data instead of base64 image
+        // CYD will generate QR code locally using QRCode library
+        const paymentData = {
+          type: 'payment_data',
+          to: currentPaymentRequest.merchantAddress,
+          token: currentPaymentRequest.tokenAddress,
+          amount: currentPaymentRequest.amountUnits,
+          decimals: 6,
+          memo: currentPaymentRequest.memo,
+          chainId: '42431',
+          displayAmount: currentPaymentRequest.amount
+        };
 
-        // Send base64 image to CYD via HTTP POST
+        console.log('Sending payment data to CYD:', paymentData);
+        console.log('Data size:', JSON.stringify(paymentData).length, 'bytes');
+
         const response = await fetch(`http://${cydIP}/display`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            type: 'qr_image',
-            image: currentQRBase64,
-            amount: currentPaymentRequest.amount,
-            memo: currentPaymentRequest.memo
-          })
+          body: JSON.stringify(paymentData)
         });
 
         if (response.ok) {
-          showAlert('✅ QR Code image sent to CYD display!', 'success');
-          addLog(`📤 Sent QR image to CYD (${cydIP}) - ${Math.round(currentQRBase64.length / 1024)}KB`, 'success');
+          showAlert('✅ Payment data sent to CYD! QR code will be generated on device.', 'success');
+          addLog(`📤 Sent payment data to CYD (${cydIP}) - ${JSON.stringify(paymentData).length} bytes`, 'success');
+          console.log('✅ CYD will generate QR code locally using QRCode library');
         } else {
           throw new Error('Failed to send to CYD');
         }
